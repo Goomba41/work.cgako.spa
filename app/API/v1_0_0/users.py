@@ -18,6 +18,7 @@ from .utils import json_http_response, sqlalchemy_filters_converter,\
 # POST user avatar
 # PUT user avatar ?
 # DELETE user avatar
+# PUT user password
 
 
 @APIv1_0_0.route('/users', methods=['GET'])
@@ -26,48 +27,46 @@ def get_users():
     """Get paginated users list."""
     try:
         # Get filters, order by and exclusions lists from request
-        filter_parameters = request.args.getlist('filter')
-        order_parameters = request.args.getlist('order_by')
-        exclusions_list = request.args.getlist('exclude')
-        columns_list = request.args.getlist('column')
+        filters_list = request.args.get('filters')
+        orders_list = request.args.get('order_by')
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
 
         exclusions_default = [
             'roles.users',
-            'departments_positions.users',
-            'departments.users',
+            'position.users',
+            'position.parent.users',
         ]
+
+        # Forming dumping parameters
+        dump_params = {}
 
         # Check if getted parameters exist in database table
         try:
             filters_list = sqlalchemy_filters_converter(
                 Users,
-                filter_parameters
+                filters_list
             )
             orders_list = sqlalchemy_orders_converter(
                 Users,
-                order_parameters
+                orders_list
             )
-            exclusions_list = marshmallow_excluding_converter(
-                Users, exclusions_list
-            )
-            columns_list = marshmallow_only_fields_converter(
-                Users, columns_list
-            )
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Users, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list + exclusions_default
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Users, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
         # Catching exception from child function and getting its parameter
         # (response in this case)
         except Exception as error:
             return error.args[0]
-
-        # Forming dumping parameters
-        dump_params = {}
-
-        if exclusions_list:
-            if 'id' in exclusions_list:
-                exclusions_list.remove('id')
-            dump_params['exclude'] = exclusions_list + exclusions_default
-
-        if columns_list:
-            dump_params['only'] = ["id"] + columns_list
 
         # Querying database with filters and ordering lists
         users = Users.query.filter(*filters_list).order_by(*orders_list).all()
@@ -109,36 +108,34 @@ def get_user(id):
     """Get one users by id."""
     try:
         # Get a list of excluded fields and only fields from a dump
-        exclusions_list = request.args.getlist('exclude')
-        columns_list = request.args.getlist('column')
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
 
         exclusions_default = [
             'roles.users',
-            'departments_positions.users',
-            'departments.users',
+            'position.users',
+            'position.parent.users',
         ]
-
-        # Check if getted parameters exist in database table
-        try:
-            exclusions_list = marshmallow_excluding_converter(
-                Users, exclusions_list
-            )
-            columns_list = marshmallow_only_fields_converter(
-                Users, columns_list
-            )
-        except Exception as error:
-            return error.args[0]
 
         # Forming dumping parameters
         dump_params = {}
 
-        if exclusions_list:
-            if 'id' in exclusions_list:
-                exclusions_list.remove('id')
-            dump_params['exclude'] = exclusions_list + exclusions_default
-
-        if columns_list:
-            dump_params['only'] = ["id"] + columns_list
+        # Check if getted parameters exist in database table
+        try:
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Users, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list + exclusions_default
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Users, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
+        except Exception as error:
+            return error.args[0]
 
         # Querying database for entity by id
         user = Users.query.get(id)

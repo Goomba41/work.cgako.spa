@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import math
 import traceback
+import sys
 
 
 def password_generator(size=8):
@@ -96,14 +97,16 @@ def json_http_response(dbg=False, given_message=None, status=500):
     # add debug information to response
     if isinstance(dbg, bool):
         if dbg is True:
-            info['debugInfo'] = traceback.format_exc()
+            if sys.exc_info()[2]:
+                info['debugInfo'] = traceback.format_exc()
     else:
         try:
             if strtobool(dbg):
-                info['debugInfo'] = traceback.format_exc()
+                if sys.exc_info()[2]:
+                    info['debugInfo'] = traceback.format_exc()
         except Exception:
-            info['debugInfo'] = "Debugging info is turned off, because "
-            "incorrect type of value of parameter 'dbg' (should be boolean)"
+            info['debugInfo'] = "Debugging info is turned off, because "\
+                "incorrect type of parameter 'dbg' (should be boolean)"
 
     return Response(
         response=json.dumps(info),
@@ -136,9 +139,28 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
 
     filters_list = []
     if filter_parameters:
+        try:
+            filter_parameters = [
+                x.strip() for x in
+                filter_parameters.split(",")
+            ]
+        except Exception:
+            raise Exception(json_http_response(
+                status=400,
+                given_message="Parsing error of list of filters «%s» from"
+                " parameter «&filter=%s». Be sure that fields separated"
+                " by comma." % (
+                    filter_parameters,
+                    filter_parameters
+                ),
+                dbg=request.args.get('dbg', False)
+            ))
         for parameter in filter_parameters:
             try:
-                column_name, op, value = parameter.split(':')
+                column_name, op, value = [
+                    x.strip() for x in
+                    parameter.split(':')
+                ]
             except Exception:
                 # Raise exception with response object as parameter
                 # for reraising it in parent function
@@ -176,7 +198,7 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
             # If operator is 'in', then parse value string to get values
             if dict_filtros_op[op] == 'in':
                 try:
-                    value = value.split(",")
+                    value = [x.strip() for x in value.split(",")]
                     filters_list.append(column.in_(value))
                 except Exception:
                     raise Exception(json_http_response(
@@ -216,9 +238,23 @@ def sqlalchemy_orders_converter(model, order_parameters=[]):
     """
     orders_list = []
     if order_parameters:
+        try:
+            order_parameters = [x.strip() for x in order_parameters.split(",")]
+        except Exception:
+            raise Exception(json_http_response(
+                status=400,
+                given_message="Parsing error of list of orderings «%s» from"
+                " parameter «&order_by=%s». Be sure that fields separated"
+                " by comma." % (
+                    order_parameters,
+                    order_parameters
+                ),
+                dbg=request.args.get('dbg', False)
+            ))
         for order in order_parameters:
+
             try:
-                column_name, direction = order.split(':')
+                column_name, direction = [x.strip() for x in order.split(':')]
             except Exception:
                 # Raise exception with response object as parameter
                 # for reraising it in parent function
@@ -276,6 +312,22 @@ def marshmallow_only_fields_converter(model, only_fields_parameters=[]):
     model (Model) - Model for which translate filters
     only_fields_parameters (List) - List of params obtained from the request
     """
+    try:
+        only_fields_parameters = [
+            x.strip() for x in
+            only_fields_parameters.split(",")
+        ]
+    except Exception:
+        raise Exception(json_http_response(
+            status=400,
+            given_message="Parsing error of list of columns «%s» from"
+            " parameter «&columns=%s». Be sure that fields separated"
+            " by comma." % (
+                only_fields_parameters,
+                only_fields_parameters
+            ),
+            dbg=request.args.get('dbg', False)
+        ))
     for column in only_fields_parameters:
         if not hasattr(model, column):
             raise Exception(json_http_response(
@@ -306,6 +358,22 @@ def marshmallow_excluding_converter(model, exclusions_parameters=[]):
     columns (String) - List of columns to order by (None by default)
     exclusions_parameters (List) - List of exclusions obtained from the request
     """
+    try:
+        exclusions_parameters = [
+            x.strip() for x in
+            exclusions_parameters.split(",")
+        ]
+    except Exception:
+        raise Exception(json_http_response(
+            status=400,
+            given_message="Parsing error of list of exclusions «%s» from"
+            " parameter «&exclude=%s». Be sure that fields separated"
+            " by comma." % (
+                exclusions_parameters,
+                exclusions_parameters
+            ),
+            dbg=request.args.get('dbg', False)
+        ))
     for exclude in exclusions_parameters:
         if not hasattr(model, exclude):
             raise Exception(json_http_response(

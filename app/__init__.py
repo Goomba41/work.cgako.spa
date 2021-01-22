@@ -21,6 +21,20 @@ mail = Mail(app)
 bcrypt = Bcrypt(app)
 ma = Marshmallow(app)
 
+# from app.models import OrganizationalStructure
+
+# db.drop_all()
+# db.create_all()
+# db.session.add(OrganizationalStructure(name="root"))
+# db.session.add_all(  # first branch of tree
+#     [
+#         OrganizationalStructure(name="Отдел1", parent_id=1),
+#         OrganizationalStructure(name="Отдел2", parent_id=1),
+#         OrganizationalStructure(name="Должность1", parent_id=4),
+#     ]
+# )
+# db.session.commit()
+
 from .API.v1_0_0.blueprint import APIv1_0_0
 
 app.register_blueprint(APIv1_0_0, url_prefix='/API/v1.0.0')

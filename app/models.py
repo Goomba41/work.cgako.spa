@@ -5,6 +5,32 @@ Flask database models initialization.
 """
 
 from app import db
+from sqlalchemy_mptt.mixins import BaseNestedSets
+
+
+class OrganizationalStructure(db.Model, BaseNestedSets):
+    """Organizational structure model."""
+
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
+    # Приводит к багу
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        comment="Уникальный идентификатор"
+    )
+    name = db.Column(db.String(100), comment="Имя элемента")
+    type = db.Column(db.SmallInteger, comment="Тип элемента")
+
+    users = db.relationship(
+        'Users',
+        backref='position',
+        lazy='dynamic',
+        uselist=True
+    )
+
+    def __repr__(self):
+        """Class representation string."""
+        return 'Structure element «%r» of type «%r»' % (self.name, self.type)
 
 
 class Users(db.Model):
@@ -51,18 +77,17 @@ class Users(db.Model):
         comment="Статус записи пользователя"
     )
 
-    department = db.Column(
-        db.Integer,
-        db.ForeignKey("innerInformationSystem_System.departments.id"),
-        comment="Отдел"
-    )
-    department_position = db.Column(
+    company_position = db.Column(
         db.Integer,
         db.ForeignKey(
-            "innerInformationSystem_System.departments_positions.id"
+            # "innerInformationSystem_System.organizational_structure.id"
+            # Приводит к багу
+            "organizational_structure.id"
         ),
+        nullable=False,
         comment="Должность"
     )
+
     role = db.Column(
         db.Integer,
         db.ForeignKey("innerInformationSystem_System.roles.id"),
@@ -101,38 +126,6 @@ class Users(db.Model):
     def __repr__(self):
         """Class representation string."""
         return 'User with login: %r ' % (self.login)
-
-
-class Departments(db.Model):
-    """Departments model."""
-
-    __table_args__ = {'schema': 'innerInformationSystem_System'}
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-
-    users = db.relationship('Users', backref='departments', lazy='dynamic')
-
-    def __repr__(self):
-        """Class representation string."""
-        return 'Department «%r»' % (self.name)
-
-
-class DepartmentsPositions(db.Model):
-    """Departments positions model."""
-
-    __table_args__ = {'schema': 'innerInformationSystem_System'}
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-
-    users = db.relationship(
-        'Users',
-        backref='departments_positions',
-        lazy='dynamic'
-    )
-
-    def __repr__(self):
-        """Class representation string."""
-        return 'Department position «%r»' % (self.name)
 
 
 class Roles(db.Model):

@@ -5,7 +5,7 @@ Flask database models initialization.
 """
 
 from app import ma
-from app.models import Roles, Departments, DepartmentsPositions, Users
+from app.models import Roles, OrganizationalStructure, Users
 
 from marshmallow_sqlalchemy import ModelSchema
 
@@ -19,22 +19,22 @@ class RolesSchema(ModelSchema):
         model = Roles
 
 
-class DepartmentsSchema(ModelSchema):
-    """Departments serialization schema."""
-
-    class Meta:
-        """Metadata."""
-
-        model = Departments
-
-
-class DepartmentsPositionsSchema(ModelSchema):
+class OrganizationalStructureSchema(ModelSchema):
     """Departments positions serialization schema."""
 
     class Meta:
         """Metadata."""
 
-        model = DepartmentsPositions
+        model = OrganizationalStructure
+        exclude = ("children",)
+
+    parent = ma.Nested(
+        lambda: OrganizationalStructureSchema(exclude=("parent",))
+    )
+    children = ma.Nested(
+        lambda: OrganizationalStructureSchema(exclude=("parent", "children",)),
+        many=True
+    )
 
 
 class UsersSchema(ModelSchema):
@@ -44,8 +44,9 @@ class UsersSchema(ModelSchema):
         """Metadata."""
 
         model = Users
-    departments_positions = ma.Nested(DepartmentsPositionsSchema)
-    departments = ma.Nested(DepartmentsSchema)
+    position = ma.Nested(
+        OrganizationalStructureSchema
+    )
     roles = ma.Nested(RolesSchema)
     links = ma.Hyperlinks(
         {
