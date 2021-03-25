@@ -21,20 +21,27 @@ mail = Mail(app)
 bcrypt = Bcrypt(app)
 ma = Marshmallow(app)
 
-# from app.models import OrganizationalStructure
+from app.models import OrganizationalStructure
+#
+# node = OrganizationalStructure.query.filter(OrganizationalStructure.id == 12).first()
+# db.session.delete(node)
+# OrganizationalStructure.rebuild_tree(db.session, '1')
 
 # db.drop_all()
 # db.create_all()
-# db.session.add(OrganizationalStructure(name="root"))
+# db.session.add(OrganizationalStructure(name="КОГБУ «ЦГАКО»"))
 # db.session.add_all(  # first branch of tree
 #     [
-#         OrganizationalStructure(name="Отдел1", parent_id=1),
-#         OrganizationalStructure(name="Отдел2", parent_id=1),
-#         OrganizationalStructure(name="Должность1", parent_id=4),
+#         OrganizationalStructure(name="Администрация", parent_id=1, type=1),
+#         OrganizationalStructure(name="Информационно-поисковых систем", parent_id=1, type=1),
+#         OrganizationalStructure(name="Программист", parent_id=3, type=2),
+#         OrganizationalStructure(name="Подотдел", parent_id=2, type=1),
+#         OrganizationalStructure(name="Должность", parent_id=5, type=2),
+#         OrganizationalStructure(name="Должность", parent_id=2, type=2),
 #     ]
 # )
-# db.session.commit()
+db.session.commit()
 
-from .API.v1_0_0.blueprint import APIv1_0_0
+from .API.v1_0_0.blueprint import APIv1_0_0  # noqa: E402
 
 app.register_blueprint(APIv1_0_0, url_prefix='/API/v1.0.0')

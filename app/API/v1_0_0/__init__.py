@@ -1,1 +1,1 @@
-"""Инициализация пакета API версии 1.0.0"""
+"""API version 1.0.0 package initialization."""

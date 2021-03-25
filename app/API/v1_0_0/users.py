@@ -4,7 +4,7 @@ from flask import Response, json, request, url_for
 
 from app.API.v1_0_0.blueprint import APIv1_0_0
 from app.models import Users
-from app.schema import UsersSchema
+from app.schemas import UsersSchema
 from .utils import json_http_response, sqlalchemy_filters_converter,\
     sqlalchemy_orders_converter, pagination_of_list,\
     marshmallow_excluding_converter, marshmallow_only_fields_converter

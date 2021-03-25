@@ -4,6 +4,6 @@ from flask import Blueprint
 
 APIv1_0_0 = Blueprint('APIv1_0_0', __name__)
 
-from . import profile
-from . import users
-from . import organizational_structure
+from . import profile  # noqa: F401, E402
+from . import users  # noqa: F401, E402
+from . import organizational_structure  # noqa: F401, E402

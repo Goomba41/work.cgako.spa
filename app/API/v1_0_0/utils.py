@@ -4,6 +4,8 @@ from random import SystemRandom
 from flask import Response, json, request, current_app as app
 from distutils.util import strtobool
 from urllib.parse import urljoin
+from sqlalchemy.inspection import inspect
+from collections import namedtuple
 
 import math
 import traceback
@@ -113,6 +115,29 @@ def json_http_response(dbg=False, given_message=None, status=500):
         status=status,
         mimetype='application/json'
     )
+
+
+def class_attribute_existence(exclude_model, exclude_fields):
+    """Deep check for the existence of a class attribute."""
+    exclude_fields = [
+        x.strip() for x in
+        exclude_fields.split(".")
+    ]
+    for item in exclude_fields:
+        i = inspect(exclude_model).relationships
+        referred_classes = [r.mapper.class_ for r in i]
+        for cls in referred_classes:
+            if cls.__tablename__ and cls.__tablename__ == item:
+                return class_attribute_existence(
+                    cls, '.'.join(exclude_fields[1:])
+                )
+            elif cls.__tablename__ != item and len(exclude_fields) > 1:
+                continue
+            elif not hasattr(exclude_model, item) and len(exclude_fields) == 1:
+                return False
+            else:
+                return True
+    return False
 
 
 # This function does not currently implement the
@@ -329,12 +354,12 @@ def marshmallow_only_fields_converter(model, only_fields_parameters=[]):
             dbg=request.args.get('dbg', False)
         ))
     for column in only_fields_parameters:
-        if not hasattr(model, column):
+        if not class_attribute_existence(model, column):
             raise Exception(json_http_response(
                 status=400,
                 given_message="Column «%s» from column parameter "
                 "«&column=%s» doesn't exist in model «%s»" % (
-                    column,
+                    column.split(".")[-1],
                     column,
                     model.__name__
                 ),
@@ -343,7 +368,9 @@ def marshmallow_only_fields_converter(model, only_fields_parameters=[]):
 
     # Remove fields not present in the model from the list
     only_fields_parameters[:] = [
-        x for x in only_fields_parameters if hasattr(model, x)
+        x for x in only_fields_parameters if class_attribute_existence(
+            model, x
+        )
     ]
 
     return only_fields_parameters
@@ -375,12 +402,12 @@ def marshmallow_excluding_converter(model, exclusions_parameters=[]):
             dbg=request.args.get('dbg', False)
         ))
     for exclude in exclusions_parameters:
-        if not hasattr(model, exclude):
+        if not class_attribute_existence(model, exclude):
             raise Exception(json_http_response(
                 status=400,
                 given_message="Column «%s» from exclude parameter "
                 "«&exclude=%s» doesn't exist in model «%s»" % (
-                    exclude,
+                    exclude.split(".")[-1],
                     exclude,
                     model.__name__
                 ),
@@ -389,7 +416,7 @@ def marshmallow_excluding_converter(model, exclusions_parameters=[]):
 
     # Remove fields not present in the model from the list
     exclusions_parameters[:] = [
-        x for x in exclusions_parameters if hasattr(model, x)
+        x for x in exclusions_parameters if class_attribute_existence(model, x)
     ]
 
     return exclusions_parameters
@@ -480,3 +507,30 @@ def pagination_of_list(query_result, url, query_params):
     response_obj['pageData'] = query_result[(start - 1):(start - 1 + limit)]
 
     return response_obj
+
+
+def variable_type_check(value, type):
+    """Variable type check and convert."""
+    TypeCheck = namedtuple(
+        typename="TypeCheck",
+        field_names=["result", "type", "value"]
+    )
+    if type is bool:
+        if not isinstance(value, type):
+            try:
+                value = strtobool(value)
+                return TypeCheck(True, type.__name__, value)
+            except Exception:
+                return TypeCheck(False, type.__name__, value)
+        else:
+            return TypeCheck(True, type.__name__, value)
+    if type is int:
+        if not isinstance(value, type):
+            try:
+                value = int(value)
+                return TypeCheck(True, type.__name__, value)
+            except Exception:
+                return TypeCheck(False, type.__name__, value)
+        else:
+            return TypeCheck(True, type.__name__, value)
+    return TypeCheck(False, type.__name__, value)
