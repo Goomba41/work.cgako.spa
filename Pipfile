@@ -15,6 +15,7 @@ pymysql = "*"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 sqlalchemy-mptt = "*"
+nodeenv = "*"
 
 [dev-packages]
 
