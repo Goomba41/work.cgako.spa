@@ -533,4 +533,13 @@ def variable_type_check(value, type):
                 return TypeCheck(False, type.__name__, value)
         else:
             return TypeCheck(True, type.__name__, value)
+    if type is str:
+        if not isinstance(value, type):
+            try:
+                value = str(value)
+                return TypeCheck(True, type.__name__, value)
+            except Exception:
+                return TypeCheck(False, type.__name__, value)
+        else:
+            return TypeCheck(True, type.__name__, value)
     return TypeCheck(False, type.__name__, value)

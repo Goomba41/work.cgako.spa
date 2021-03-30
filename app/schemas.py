@@ -69,6 +69,23 @@ class OrganizationalStructureSchema(ModelSchema):
     )
     users = ma.Nested(UsersStructureSchema, many=True)
 
+    links = ma.Hyperlinks(
+        {
+            "self": ma.URLFor(
+                "APIv1_0_0.get_organizational_structure_element",
+                values=dict(
+                    id="<id>", _external=True
+                )
+            ),
+            "collection": ma.URLFor(
+                "APIv1_0_0.get_organizational_structure",
+                values=dict(
+                    _external=True
+                )
+            ),
+        }
+    )
+
 
 class UsersSchema(UsersBaseSchema):
     """System user serialization schema."""

@@ -3,6 +3,7 @@
 from flask import Response, json, request, url_for
 
 from .blueprint import APIv1_0_0
+from app import db
 from app.models import OrganizationalStructure
 from app.schemas import OrganizationalStructureSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
@@ -170,11 +171,167 @@ def post_organizational_structure_element():
     """Post element to organizational structure."""
     try:
         # Get parameters from request
-        element_type = request.args.get('type', 1)
-        parent_id = request.args.get('parent', 1)
-        name = request.args.get('name', False)
+        element_type = variable_type_check(request.args.get('type', 1), int)
+        if not element_type.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&type=%s» is not type of «%s»" % (
+                    element_type.value,
+                    element_type.value,
+                    element_type.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        elif element_type.value not in range(1, 3, 1):
+            return json_http_response(
+                status=400,
+                given_message="The type submitted in parameter"
+                " «&type=%s» is does not exist" % (
+                    element_type.value
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
-        print(element_type, parent_id, name)
+        parent_id = variable_type_check(request.args.get('parent', 1), int)
+        if not parent_id.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&parent=%s» is not type of «%s»" % (
+                    parent_id.value,
+                    parent_id.value,
+                    parent_id.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            parent = OrganizationalStructure.query.filter(
+                OrganizationalStructure.id == parent_id.value
+            ).first()
+            if not parent:
+                return json_http_response(
+                    status=400,
+                    given_message="The parent submitted in parameter"
+                    " «&parent=%s» is does not exist" % (
+                        parent_id.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+
+        name = variable_type_check(request.args.get('name'), str)
+        if not name.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&name=%s» is not type of «%s»" % (
+                    name.value,
+                    name.value,
+                    name.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if len(name.value) > 100:
+            answer_string = str(
+                name.value[:10]
+            )+"..." if len(name.value) > 10 else name.value
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&name=%s» is out of range 1-100" % (
+                    answer_string,
+                    answer_string
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        elif len(name.value) <= 0:
+            name = 'Должность' if element_type.value == 2 else (
+                'Отдел' if (
+                    element_type.value == 1 and parent_id.value == 1
+                ) else 'Подотдел'
+            )
+        else:
+            name = name.value
+
+        if ((parent.type == 2 and element_type.value == 2) or
+           (parent.type == 2 and element_type.value == 1)):
+            return json_http_response(
+                status=400,
+                given_message="You cannot insert a new element"
+                " «%s» under a position «%s»" % (
+                    name,
+                    parent.name,
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            node = OrganizationalStructure(
+                parent_id=parent_id.value,
+                type=element_type.value,
+                name=name
+            )
+            db.session.add(node)
+            db.session.flush()
+
+            node_schema = OrganizationalStructureSchema(only=["name", "links"])
+            node_dump = node_schema.dump(node)
+
+            db.session.commit()
+
+            output_json = {
+                "message": "Successfully inserted element"
+                " «%s» under a element «%s»" % (
+                    name,
+                    parent.name,
+                ),
+                "links": node_dump['links'],
+                "responseType": "Success",
+                "status": 200
+            }
+
+            response = Response(
+                response=json.dumps(output_json),
+                status=200,
+                mimetype='application/json'
+            )
+
+    except Exception:
+
+        response = json_http_response(dbg=request.args.get('dbg', False))
+
+    return response
+
+
+@APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['PUT'])
+# @token_required
+def put_organizational_structure_element(id):
+    """Delete element from organizational structure."""
+    try:
+        response = Response(
+            response=json.dumps("K.O.!"),
+            status=200,
+            mimetype='application/json'
+        )
+    except Exception:
+
+        response = json_http_response(dbg=request.args.get('dbg', False))
+
+    return response
+
+
+@APIv1_0_0.route(
+    '/organization/structure/elements/<int:id>',
+    methods=['DELETE']
+)
+# @token_required
+def delete_organizational_structure_element(id):
+    """Delete element from organizational structure."""
+    try:
+        # node = OrganizationalStructure.query.filter
+        #     OrganizationalStructure.id == 8
+        # ).first()
+        # db.session.delete(node)
+        # db.session.commit()
 
         response = Response(
             response=json.dumps("K.O.!"),

@@ -21,7 +21,7 @@ mail = Mail(app)
 bcrypt = Bcrypt(app)
 ma = Marshmallow(app)
 
-from app.models import OrganizationalStructure
+# from app.models import OrganizationalStructure
 #
 # node = OrganizationalStructure.query.filter(OrganizationalStructure.id == 12).first()
 # db.session.delete(node)
@@ -40,7 +40,7 @@ from app.models import OrganizationalStructure
 #         OrganizationalStructure(name="Должность", parent_id=2, type=2),
 #     ]
 # )
-db.session.commit()
+# db.session.commit()
 
 from .API.v1_0_0.blueprint import APIv1_0_0  # noqa: E402
 
