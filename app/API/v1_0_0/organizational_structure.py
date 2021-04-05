@@ -11,11 +11,7 @@ from .utils import json_http_response, marshmallow_excluding_converter, \
     sqlalchemy_orders_converter, pagination_of_list, variable_type_check
 
 # List of routes:
-# GET full tree
-# GET part of tree
-# POST element to tree
 # PUT data to element or move him on tree
-# DELETE element of tree
 
 
 @APIv1_0_0.route('/organization/structure', methods=['GET'])
@@ -168,7 +164,14 @@ def get_organizational_structure_element(id):
 @APIv1_0_0.route('/organization/structure/elements/', methods=['POST'])
 # @token_required
 def post_organizational_structure_element():
-    """Post element to organizational structure."""
+    """Post element to organizational structure.
+
+    Post element to parent element by parent, name and type parameters.
+    Type parameter is number 1 (department) or 2 (position of department).
+    If parent is not sended, post element to root element. If name is not
+    sended, set by default relative to type. Elements with any type cannot be
+    inserted to element with type 2.
+    """
     try:
         # Get parameters from request
         element_type = variable_type_check(request.args.get('type', 1), int)
@@ -211,7 +214,7 @@ def post_organizational_structure_element():
             ).first()
             if not parent:
                 return json_http_response(
-                    status=400,
+                    status=404,
                     given_message="The parent submitted in parameter"
                     " «&parent=%s» is does not exist" % (
                         parent_id.value
@@ -219,7 +222,7 @@ def post_organizational_structure_element():
                     dbg=request.args.get('dbg', False)
                 )
 
-        name = variable_type_check(request.args.get('name'), str)
+        name = variable_type_check(request.args.get('name', ''), str)
         if not name.result:
             return json_http_response(
                 status=400,
@@ -302,15 +305,98 @@ def post_organizational_structure_element():
     return response
 
 
-@APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['PUT'])
+@APIv1_0_0.route(
+    '/organization/structure/elements/<int:id>',
+    methods=['DELETE']
+)
 # @token_required
-def put_organizational_structure_element(id):
-    """Delete element from organizational structure."""
+def delete_organizational_structure_element(id):
+    """Delete element from organizational structure.
+
+    Delete element with recursion function (with all child elements)
+    by boolean parameter. If parameter is False or not set, move all
+    child elements to parent of deleting element, before delete element
+    to prevent child deletion. 'Save' cascade deletion (to all users with
+    position from this tree set NULL as 'company_position' foreign key). Checks
+    for deletion element existense and is he the root element.
+    """
     try:
-        response = Response(
-            response=json.dumps("K.O.!"),
+
+        node_to_delete = OrganizationalStructure.query.filter(
+            OrganizationalStructure.id == id
+        ).first()
+
+        if node_to_delete is None:
+            return json_http_response(
+                status=404,
+                given_message="Element to delete with id=%s is not exist"
+                " in database" % (id),
+                dbg=request.args.get('dbg', False)
+            )
+        elif node_to_delete.id == 1 or node_to_delete.left == 1:
+            return json_http_response(
+                status=400,
+                given_message="Root element «%s» cannot be deleted" % (
+                    node_to_delete.name
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        recursive = variable_type_check(
+            request.args.get('recursive', False), bool
+        )
+        if not recursive.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&recursive=%s» is not type of «%s»" % (
+                    recursive.value,
+                    recursive.value,
+                    recursive.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        elif recursive.value:
+            db.session.delete(node_to_delete)
+
+            if len(node_to_delete.children):
+                given_message = "Element «{0}» successfully deleted from" \
+                    " database with all children elements".format(
+                        node_to_delete.name
+                    )
+            else:
+                given_message = "Element «{0}» successfully deleted from" \
+                    " database".format(
+                        node_to_delete.name
+                    )
+        else:
+            if len(node_to_delete.children):
+                # Moving child to parent of root element
+                # to prevent from deletion
+                for child in node_to_delete.children:
+                    child.move_inside(node_to_delete.parent_id)
+                db.session.commit()
+
+                # And then delete root element
+                db.session.delete(node_to_delete)
+                given_message = "Element «{0}» successfully deleted from" \
+                    " database. All children elements moved to top" \
+                    " level".format(
+                        node_to_delete.name
+                    )
+            else:
+                db.session.delete(node_to_delete)
+                given_message = "Element «{0}» successfully deleted from" \
+                    " database".format(
+                        node_to_delete.name
+                    )
+
+        db.session.commit()
+
+        return json_http_response(
             status=200,
-            mimetype='application/json'
+            given_message=given_message,
+            dbg=request.args.get('dbg', False)
         )
     except Exception:
 
@@ -319,20 +405,11 @@ def put_organizational_structure_element(id):
     return response
 
 
-@APIv1_0_0.route(
-    '/organization/structure/elements/<int:id>',
-    methods=['DELETE']
-)
+@APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['PUT'])
 # @token_required
-def delete_organizational_structure_element(id):
-    """Delete element from organizational structure."""
+def put_organizational_structure_element(id):
+    """Change info, parent, order of element from organizational structure."""
     try:
-        # node = OrganizationalStructure.query.filter
-        #     OrganizationalStructure.id == 8
-        # ).first()
-        # db.session.delete(node)
-        # db.session.commit()
-
         response = Response(
             response=json.dumps("K.O.!"),
             status=200,
