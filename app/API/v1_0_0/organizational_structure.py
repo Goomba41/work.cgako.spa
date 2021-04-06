@@ -1,6 +1,7 @@
 """Views of API version 1.0.0: User profile."""
 
 from flask import Response, json, request, url_for
+from collections import Counter
 
 from .blueprint import APIv1_0_0
 from app import db
@@ -189,7 +190,7 @@ def post_organizational_structure_element():
         elif element_type.value not in range(1, 3, 1):
             return json_http_response(
                 status=400,
-                given_message="The type submitted in parameter"
+                given_message="The type submitted parameter"
                 " «&type=%s» is does not exist" % (
                     element_type.value
                 ),
@@ -215,14 +216,14 @@ def post_organizational_structure_element():
             if not parent:
                 return json_http_response(
                     status=404,
-                    given_message="The parent submitted in parameter"
+                    given_message="The parent submitted parameter"
                     " «&parent=%s» is does not exist" % (
                         parent_id.value
                     ),
                     dbg=request.args.get('dbg', False)
                 )
 
-        name = variable_type_check(request.args.get('name', ''), str)
+        name = variable_type_check(request.args.get('name', '').strip(), str)
         if not name.result:
             return json_http_response(
                 status=400,
@@ -408,10 +409,217 @@ def delete_organizational_structure_element(id):
 @APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['PUT'])
 # @token_required
 def put_organizational_structure_element(id):
-    """Change info, parent, order of element from organizational structure."""
+    """Change info, parent, order of element from organizational structure.
+
+    Update info about element by data fields (name, type) and parameters
+    'after' and 'before'. Before and after parameters cannot be used at the
+    same time. When changing element type, check its children, and if there
+    are, then element cannot be of type 2 (department position). Cannot be
+    inserted into type 2 element.
+    """
+    def elements_moving(id, move_type):
+        id = variable_type_check(id, int)
+        if not id.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&parent=%s» is not type of «%s»" % (
+                    id.value,
+                    id.value,
+                    id.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            target = OrganizationalStructure.query.filter(
+                OrganizationalStructure.id == id.value
+            ).first()
+            if not target:
+                raise Exception(json_http_response(
+                    status=404,
+                    given_message="The parent in submitted parameter"
+                    " «&parent=%s» is does not exist" % (
+                        id.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                ))
+            elif move_type == 'inside' and target.type == 2:
+                raise Exception(json_http_response(
+                    status=400,
+                    given_message="Cannot move element with"
+                    " id=%s to type 2 (department position) element."
+                    " Position cannot have child elements.",
+                    dbg=request.args.get('dbg', False)
+                ))
+            elif move_type == 'inside' and (
+                node_to_update.parent_id != id.value
+            ):
+                node_to_update.move_inside(id.value)
+                print("move inside %s" % id.value)
+            else:
+                if move_type == 'after':
+                    node_to_update.move_after(id.value)
+                    print("move after %s" % id.value)
+                if move_type == 'before':
+                    node_to_update.move_before(id.value)
+                    print("move before %s" % id.value)
+                print(node_to_update.left, node_to_update.right)
+
     try:
+        # Check if asked element is exist and he is not root element
+        node_to_update = OrganizationalStructure.query.filter(
+            OrganizationalStructure.id == id
+        ).first()
+        old_node_name = node_to_update.name
+
+        if node_to_update is None:
+            return json_http_response(
+                status=404,
+                given_message="Element to update with id=%s is not exist"
+                " in database" % (id),
+                dbg=request.args.get('dbg', False)
+            )
+        elif node_to_update.id == 1 or node_to_update.left == 1:
+            return json_http_response(
+                status=400,
+                given_message="Root element «%s» cannot be updated" % (
+                    node_to_update.name
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        # Get parameters from request and change if needed
+        element_type = request.args.get('type', None)
+        if element_type:
+            element_type = variable_type_check(element_type, int)
+            if not element_type.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&type=%s» is not type of «%s»" % (
+                        element_type.value,
+                        element_type.value,
+                        element_type.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif element_type.value not in range(1, 3, 1):
+                return json_http_response(
+                    status=400,
+                    given_message="The type submitted parameter"
+                    " «&type=%s» is does not exist" % (
+                        element_type.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif element_type.value != node_to_update.type:
+                if len(node_to_update.children):
+                    return json_http_response(
+                        status=400,
+                        given_message="Cannot change type of element with"
+                        " id=%s to type 2 (department position) because he"
+                        " has child elements. Move child elements under"
+                        " other element first." % (node_to_update.id),
+                        dbg=request.args.get('dbg', False)
+                    )
+                else:
+                    node_to_update.type = element_type.value
+
+        element_name = request.args.get('name', None)
+        if element_name:
+            element_name = variable_type_check(element_name.strip(), str)
+            if not element_name.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&name=%s» is not type of «%s»" % (
+                        element_name.value,
+                        element_name.value,
+                        element_name.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(element_name.value) > 100:
+                answer_string = str(
+                    element_name.value[:10]
+                )+"..." if len(element_name.value) > 10 else element_name.value
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&name=%s» is out of range 1-100" % (
+                        answer_string,
+                        answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif (len(element_name.value) > 0) and (
+                    element_name.value != node_to_update.name
+            ):
+                node_to_update.name = element_name.value
+
+        parent_id = request.args.get('parent', None)
+        after_id = request.args.get('after', None)
+        before_id = request.args.get('before', None)
+
+        list1 = [
+            True if x else False for x in (parent_id, after_id, before_id)
+        ]
+
+        if dict(Counter(list1).items())[True] >= 2:
+            return json_http_response(
+                status=400,
+                given_message="Submitted more than one from parameters:"
+                " parent, after, before. May be processed only one parameter"
+                " at time. Please, exclude unnecessary parameterы from request"
+                " first.",
+                dbg=request.args.get('dbg', False)
+            )
+
+        try:
+            if parent_id:
+                elements_moving(parent_id, 'inside')
+            if after_id:
+                # ЗДЕСЬ ЕСТЬ БАГ В БИБЛИОТЕКЕ MPTT:
+                # СМЕЩАЕТСЯ НА ОДИН БОЛЬШЕ
+                # https://github.com/uralbash/sqlalchemy_mptt/issues/67
+                # elements_moving(after_id, 'after')
+                return json_http_response(
+                    status=400,
+                    given_message="Function is bugged, so temporarly does"
+                    " not work",
+                    dbg=request.args.get('dbg', False)
+                )
+            if before_id:
+                elements_moving(before_id, 'before')
+        except Exception as error:
+            return error.args[0]
+
+        node_schema = OrganizationalStructureSchema(only=["name", "links"])
+        node_dump = node_schema.dump(node_to_update)
+
+        if db.session.dirty:
+            db.session.commit()
+
+            output_json = {
+                "message": "Successfully updated element"
+                " «%s»" % (old_node_name),
+                "links": node_dump['links'],
+                "responseType": "Success",
+                "status": 200
+            }
+        else:
+            output_json = {
+                "message": "Element «%s» is stay unchanged, because you"
+                " did not submit data or submitted data is the same" % (
+                    old_node_name
+                ),
+                "links": node_dump['links'],
+                "responseType": "Success",
+                "status": 304
+            }
+
         response = Response(
-            response=json.dumps("K.O.!"),
+            response=json.dumps(output_json),
             status=200,
             mimetype='application/json'
         )
