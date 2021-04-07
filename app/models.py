@@ -20,6 +20,10 @@ class OrganizationalStructure(db.Model, BaseNestedSets):
     )
     name = db.Column(db.String(100), comment="Имя элемента")
     type = db.Column(db.SmallInteger, comment="Тип элемента")
+    deletable = db.Column(db.SmallInteger, comment="Удаляемый?", default=1)
+    movable = db.Column(db.SmallInteger, comment="Двигаемый?", default=1)
+    updatable = db.Column(db.SmallInteger, comment="Обновляемый?", default=1)
+    insertable = db.Column(db.SmallInteger, comment="Потомки?", default=1)
 
     users = db.relationship(
         'Users',

@@ -277,7 +277,9 @@ def post_organizational_structure_element():
             db.session.add(node)
             db.session.flush()
 
-            node_schema = OrganizationalStructureSchema(only=["name", "links"])
+            node_schema = OrganizationalStructureSchema(
+                only=["id", "name", "links", "type"]
+            )
             node_dump = node_schema.dump(node)
 
             db.session.commit()
@@ -289,6 +291,8 @@ def post_organizational_structure_element():
                     parent.name,
                 ),
                 "links": node_dump['links'],
+                "id": node_dump['id'],
+                "type": node_dump['type'],
                 "responseType": "Success",
                 "status": 200
             }
@@ -437,8 +441,8 @@ def put_organizational_structure_element(id):
             if not target:
                 raise Exception(json_http_response(
                     status=404,
-                    given_message="The parent in submitted parameter"
-                    " «&parent=%s» is does not exist" % (
+                    given_message="The target in one of submitted parameter"
+                    " «&parent=», «&before=», «&after=» is does not exist" % (
                         id.value
                     ),
                     dbg=request.args.get('dbg', False)
@@ -448,7 +452,9 @@ def put_organizational_structure_element(id):
                     status=400,
                     given_message="Cannot move element with"
                     " id=%s to type 2 (department position) element."
-                    " Position cannot have child elements.",
+                    " Position cannot have child elements." % (
+                        node_to_update.id
+                    ),
                     dbg=request.args.get('dbg', False)
                 ))
             elif move_type == 'inside' and (
@@ -461,9 +467,10 @@ def put_organizational_structure_element(id):
                     node_to_update.move_after(id.value)
                     print("move after %s" % id.value)
                 if move_type == 'before':
+                    print(node_to_update.left, node_to_update.right, node_to_update.parent_id)
                     node_to_update.move_before(id.value)
-                    print("move before %s" % id.value)
-                print(node_to_update.left, node_to_update.right)
+                    print("%s move before %s" % (node_to_update.id, id.value))
+                    print(node_to_update.left, node_to_update.right, node_to_update.parent_id)
 
     try:
         # Check if asked element is exist and he is not root element
@@ -590,6 +597,9 @@ def put_organizational_structure_element(id):
                     dbg=request.args.get('dbg', False)
                 )
             if before_id:
+                # ЗДЕСЬ ЕСТЬ БАГ В БИБЛИОТЕКЕ MPTT:
+                # ПРИ ПЕРЕМЕЩЕНИИ НА САМУЮ ЛЕВУЮ ПОЗИЦИЮ НИЧЕГО НЕ ПРОИСХОДИТ
+                # https://github.com/uralbash/sqlalchemy_mptt/issues/68
                 elements_moving(before_id, 'before')
         except Exception as error:
             return error.args[0]

@@ -27,8 +27,7 @@
       <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
       <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
     </ul>
-    <div>
-      <button @click="addNode">Add Node</button>
+    <div style="margin-top: 3rem;">
       <vue-tree-list
         @click="onClick"
         @change-name="onChangeName"
@@ -37,10 +36,10 @@
         @drop="onDrop"
         @drop-before="onDropBefore"
         @drop-after="onDropAfter"
-        :model="data"
+        :model="structure"
         default-tree-node-name="new node"
         default-leaf-node-name="new leaf"
-        v-bind:default-expanded="false"
+        v-bind:default-expanded="true"
       >
         <template v-slot:leafNameDisplay="slotProps">
           <span>
@@ -64,7 +63,9 @@
 </template>
 
 <script>
-import { VueTreeList, Tree, TreeNode } from 'vue-tree-list'
+// import { VueTreeList, TreeNode } from 'vue-tree-list';
+import { VueTreeList, Tree } from 'vue-tree-list';
+import axios from 'axios';
 export default {
   name: 'HelloWorld',
   components: {
@@ -76,55 +77,67 @@ export default {
   data() {
     return {
       newTree: {},
-      data: new Tree([
-        {
-          name: 'Node 1',
-          id: 1,
-          pid: 0,
-          dragDisabled: true,
-          addTreeNodeDisabled: true,
-          addLeafNodeDisabled: true,
-          editNodeDisabled: true,
-          delNodeDisabled: true,
-          children: [
-            {
-              name: 'Node 1-2',
-              id: 2,
-              isLeaf: true,
-              pid: 1
-            }
-          ]
-        },
-        {
-          name: 'Node 2',
-          id: 3,
-          pid: 0,
-          disabled: true
-        },
-        {
-          name: 'Node 3',
-          id: 4,
-          pid: 0
-        }
-      ])
+      structure: new Tree([])
     }
   },
+  mounted() {
+    this.structureLoad()
+  },
   methods: {
+    structureLoad(){
+      return axios.get('/API/v1.0.0/organization/structure/elements?dbg=true')
+        .then((response) => {
+          console.log(response.data);
+          this.structure = new Tree(response.data);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+
     onDrop(node){
-      console.log('into ' + node.target.id);
+      console.log(node.node.id + ' into '  + node.target.id);
+      return axios.put(`/API/v1.0.0/organization/structure/elements/${node.node.id}?dbg=true&parent=${node.target.id}`)
+        .then((response) => {
+          console.log(response.data);
+          // node.node.moveInto(node.target);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error.response.data);
+        });
     },
 
     onDropBefore(node){
-      console.log('before ' + node.target.id);
+      console.log(node.node.id + ' before '  + node.target.id);
+      return axios.put(`/API/v1.0.0/organization/structure/elements/${node.node.id}?dbg=true&before=${node.target.id}`)
+        .then((response) => {
+          console.log(response.data);
+          // node.node.moveBefore(node.target);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error.response.data);
+        });
     },
 
+    // Не понятно как используется
     onDropAfter(node){
       console.log('after ' + node.target.id);
     },
 
     onDel(node) {
-     console.log(node)
-     node.remove()
+     console.log(node.id)
+     return axios.delete(`/API/v1.0.0/organization/structure/elements/${node.id}?dbg=true`)
+       .then((response) => {
+         console.log(response.data);
+         node.remove()
+       })
+       .catch((error) => {
+         // eslint-disable-next-line
+         console.error(error.response.data);
+       });
     },
 
    onChangeName(params) {
@@ -132,17 +145,24 @@ export default {
    },
 
    onAddNode(params) {
-     console.log(params)
+     return axios.post(`/API/v1.0.0/organization/structure/elements?dbg=true&type=${params.isLeaf ? 2 : 1}&parent=${params.pid}`)
+       .then((response) => {
+         params.id = response.data.id;
+         if (response.data.type === 2) {
+           params.isLeaf = true;
+         } else {
+           params.isLeaf = false;
+         }
+         console.log(response.data);
+       })
+       .catch((error) => {
+         // eslint-disable-next-line
+         console.error(error.response.data);
+       });
    },
 
    onClick(params) {
      console.log(params)
-   },
-
-   addNode() {
-     var node = new TreeNode({ name: 'new node', isLeaf: false })
-     if (!this.data.children) this.data.children = []
-     this.data.addChildren(node)
    },
 
    getNewTree() {
@@ -165,7 +185,7 @@ export default {
        return newNode
      }
 
-     vm.newTree = _dfs(vm.data)
+     vm.newTree = _dfs(vm.structure)
    }
   }
 }
