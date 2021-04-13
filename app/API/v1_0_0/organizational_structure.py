@@ -11,9 +11,6 @@ from .utils import json_http_response, marshmallow_excluding_converter, \
     marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
     sqlalchemy_orders_converter, pagination_of_list, variable_type_check
 
-# List of routes:
-# PUT data to element or move him on tree
-
 
 @APIv1_0_0.route('/organization/structure', methods=['GET'])
 @APIv1_0_0.route('/organization/structure/elements', methods=['GET'])
@@ -268,6 +265,79 @@ def post_organizational_structure_element():
         else:
             name = name.value
 
+        # Get object state parameters from request and change if necessary
+        element_insertable = variable_type_check(
+            request.args.get('insertable', True),
+            bool
+        )
+        if not element_insertable.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&insertable=%s» is not type of «%s»" % (
+                    element_insertable.value,
+                    element_insertable.value,
+                    element_insertable.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            insertable = element_insertable.value
+
+        element_updatable = variable_type_check(
+            request.args.get('updatable', True),
+            bool
+        )
+        if not element_updatable.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&updatable=%s» is not type of «%s»" % (
+                    element_updatable.value,
+                    element_updatable.value,
+                    element_updatable.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            updatable = element_updatable.value
+
+        element_movable = variable_type_check(
+            request.args.get('movable', True),
+            bool
+        )
+        if not element_movable.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&movable=%s» is not type of «%s»" % (
+                    element_movable.value,
+                    element_movable.value,
+                    element_movable.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            movable = element_movable.value
+
+        element_deletable = variable_type_check(
+            request.args.get('deletable', True),
+            bool
+        )
+        if not element_deletable.result:
+            return json_http_response(
+                status=400,
+                given_message="Value «%s» from"
+                " parameter «&deletable=%s» is not type of «%s»" % (
+                    element_deletable.value,
+                    element_deletable.value,
+                    element_deletable.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            deletable = element_deletable.value
+
         if ((parent.type == 2 and element_type.value == 2) or
            (parent.type == 2 and element_type.value == 1)):
             return json_http_response(
@@ -283,7 +353,11 @@ def post_organizational_structure_element():
             node = OrganizationalStructure(
                 parent_id=parent_id.value,
                 type=element_type.value,
-                name=name
+                name=name,
+                insertable=insertable,
+                deletable=deletable,
+                movable=movable,
+                updatable=updatable,
             )
             db.session.add(node)
             db.session.flush()
@@ -292,7 +366,7 @@ def post_organizational_structure_element():
                 only=["id", "name", "links", "type"]
             )
             node_dump = node_schema.dump(node)
-
+            print(node_dump)
             db.session.commit()
 
             output_json = {
@@ -523,9 +597,76 @@ def put_organizational_structure_element(id):
                 dbg=request.args.get('dbg', False)
             )
 
-        # Get parameters from request and change if needed
+        # Get parameters from request and change if necessary
         element_type = request.args.get('type', None)
         element_name = request.args.get('name', None)
+
+        # Get object state parameters from request and change if necessary
+        element_deletable = request.args.get('deletable', None)
+        element_movable = request.args.get('movable', None)
+        element_updatable = request.args.get('updatable', None)
+        element_insertable = request.args.get('insertable', None)
+
+        if element_insertable:
+            element_insertable = variable_type_check(element_insertable, bool)
+            if not element_insertable.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&insertable=%s» is not type of «%s»" % (
+                        element_insertable.value,
+                        element_insertable.value,
+                        element_insertable.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif node_to_update.insertable != element_insertable.value:
+                node_to_update.insertable = element_insertable.value
+        if element_updatable:
+            element_updatable = variable_type_check(element_updatable, bool)
+            if not element_updatable.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&updatable=%s» is not type of «%s»" % (
+                        element_updatable.value,
+                        element_updatable.value,
+                        element_updatable.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif node_to_update.updatable != element_updatable.value:
+                node_to_update.updatable = element_updatable.value
+        if element_movable:
+            element_movable = variable_type_check(element_movable, bool)
+            if not element_movable.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&movable=%s» is not type of «%s»" % (
+                        element_movable.value,
+                        element_movable.value,
+                        element_movable.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif node_to_update.movable != element_movable.value:
+                node_to_update.movable = element_movable.value
+        if element_deletable:
+            element_deletable = variable_type_check(element_deletable, bool)
+            if not element_deletable.result:
+                return json_http_response(
+                    status=400,
+                    given_message="Value «%s» from"
+                    " parameter «&deletable=%s» is not type of «%s»" % (
+                        element_deletable.value,
+                        element_deletable.value,
+                        element_deletable.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif node_to_update.deletable != element_deletable.value:
+                node_to_update.deletable = element_deletable.value
 
         if (element_type or element_name) and node_to_update.updatable:
             if element_type:
