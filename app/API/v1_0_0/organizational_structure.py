@@ -222,6 +222,17 @@ def post_organizational_structure_element():
                     ),
                     dbg=request.args.get('dbg', False)
                 )
+            elif parent.type != 1 or not parent.insertable:
+                return json_http_response(
+                    status=403,
+                    given_message="Element cannot be inserted into parent «%s»"
+                    " with id=%s: parent is the position of the department,"
+                    " or insertion into the parent is prohibited" % (
+                        parent.name,
+                        parent_id.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
 
         name = variable_type_check(request.args.get('name', '').strip(), str)
         if not name.result:
@@ -290,9 +301,7 @@ def post_organizational_structure_element():
                     name,
                     parent.name,
                 ),
-                "links": node_dump['links'],
-                "id": node_dump['id'],
-                "type": node_dump['type'],
+                "node": node_dump,
                 "responseType": "Success",
                 "status": 200
             }
@@ -330,6 +339,14 @@ def delete_organizational_structure_element(id):
         node_to_delete = OrganizationalStructure.query.filter(
             OrganizationalStructure.id == id
         ).first()
+
+        if not node_to_delete.deletable:
+            return json_http_response(
+                status=403,
+                given_message="Element «%s» with id=%s is prohibited from "
+                " deleting" % (node_to_delete.name, node_to_delete.id),
+                dbg=request.args.get('dbg', False)
+            )
 
         if node_to_delete is None:
             return json_http_response(
@@ -447,13 +464,17 @@ def put_organizational_structure_element(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
-            elif move_type == 'inside' and target.type == 2:
+            elif move_type == 'inside' and (
+                        target.type == 2 or not target.insertable
+                    ):
                 raise Exception(json_http_response(
-                    status=400,
-                    given_message="Cannot move element with"
-                    " id=%s to type 2 (department position) element."
-                    " Position cannot have child elements." % (
-                        node_to_update.id
+                    status=403,
+                    given_message="Unable to move element with id=%s to"
+                    " element with id=%s: target element is of type 2"
+                    " (department position cannot have children) or insertion"
+                    " into target item is not allowed" % (
+                        node_to_update.id,
+                        target.id
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -461,16 +482,23 @@ def put_organizational_structure_element(id):
                 node_to_update.parent_id != id.value
             ):
                 node_to_update.move_inside(id.value)
-                print("move inside %s" % id.value)
-            else:
+            elif target.parent.insertable:
                 if move_type == 'after':
                     node_to_update.move_after(id.value)
-                    print("move after %s" % id.value)
                 if move_type == 'before':
-                    print(node_to_update.left, node_to_update.right, node_to_update.parent_id)
                     node_to_update.move_before(id.value)
-                    print("%s move before %s" % (node_to_update.id, id.value))
-                    print(node_to_update.left, node_to_update.right, node_to_update.parent_id)
+            else:
+                raise Exception(json_http_response(
+                    status=403,
+                    given_message="Unable to move element with id=%s before or"
+                    " after element with id=%s: insertion into target element"
+                    " parent with id=%s is not allowed" % (
+                        node_to_update.id,
+                        target.id,
+                        target.parent.id
+                    ),
+                    dbg=request.args.get('dbg', False)
+                ))
 
     try:
         # Check if asked element is exist and he is not root element
@@ -497,72 +525,78 @@ def put_organizational_structure_element(id):
 
         # Get parameters from request and change if needed
         element_type = request.args.get('type', None)
-        if element_type:
-            element_type = variable_type_check(element_type, int)
-            if not element_type.result:
-                return json_http_response(
-                    status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&type=%s» is not type of «%s»" % (
-                        element_type.value,
-                        element_type.value,
-                        element_type.type
-                    ),
-                    dbg=request.args.get('dbg', False)
-                )
-            elif element_type.value not in range(1, 3, 1):
-                return json_http_response(
-                    status=400,
-                    given_message="The type submitted parameter"
-                    " «&type=%s» is does not exist" % (
-                        element_type.value
-                    ),
-                    dbg=request.args.get('dbg', False)
-                )
-            elif element_type.value != node_to_update.type:
-                if len(node_to_update.children):
+        element_name = request.args.get('name', None)
+
+        if (element_type or element_name) and node_to_update.updatable:
+            if element_type:
+                element_type = variable_type_check(element_type, int)
+                if not element_type.result:
                     return json_http_response(
                         status=400,
-                        given_message="Cannot change type of element with"
-                        " id=%s to type 2 (department position) because he"
-                        " has child elements. Move child elements under"
-                        " other element first." % (node_to_update.id),
+                        given_message="Value «%s» from"
+                        " parameter «&type=%s» is not type of «%s»" % (
+                            element_type.value,
+                            element_type.value,
+                            element_type.type
+                        ),
                         dbg=request.args.get('dbg', False)
                     )
-                else:
-                    node_to_update.type = element_type.value
+                elif element_type.value not in range(1, 3, 1):
+                    return json_http_response(
+                        status=400,
+                        given_message="The type submitted parameter"
+                        " «&type=%s» is does not exist" % (
+                            element_type.value
+                        ),
+                        dbg=request.args.get('dbg', False)
+                    )
+                elif element_type.value != node_to_update.type:
+                    if len(node_to_update.children):
+                        return json_http_response(
+                            status=400,
+                            given_message="Cannot change type of element with"
+                            " id=%s to type 2 (department position) because he"
+                            " has child elements. Move child elements under"
+                            " other element first." % (node_to_update.id),
+                            dbg=request.args.get('dbg', False)
+                        )
+                    else:
+                        node_to_update.type = element_type.value
 
-        element_name = request.args.get('name', None)
-        if element_name:
-            element_name = variable_type_check(element_name.strip(), str)
-            if not element_name.result:
-                return json_http_response(
-                    status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&name=%s» is not type of «%s»" % (
-                        element_name.value,
-                        element_name.value,
-                        element_name.type
-                    ),
-                    dbg=request.args.get('dbg', False)
-                )
-            if len(element_name.value) > 100:
-                answer_string = str(
-                    element_name.value[:10]
-                )+"..." if len(element_name.value) > 10 else element_name.value
-                return json_http_response(
-                    status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&name=%s» is out of range 1-100" % (
-                        answer_string,
-                        answer_string
-                    ),
-                    dbg=request.args.get('dbg', False)
-                )
-            elif (len(element_name.value) > 0) and (
-                    element_name.value != node_to_update.name
-            ):
-                node_to_update.name = element_name.value
+            if element_name:
+                element_name = variable_type_check(element_name.strip(), str)
+                if not element_name.result:
+                    return json_http_response(
+                        status=400,
+                        given_message="Value «%s» from"
+                        " parameter «&name=%s» is not type of «%s»" % (
+                            element_name.value,
+                            element_name.value,
+                            element_name.type
+                        ),
+                        dbg=request.args.get('dbg', False)
+                    )
+                if len(element_name.value) > 100:
+                    answer_string = str(
+                        element_name.value[:5]
+                    )+"..."+str(
+                        element_name.value[-5:]
+                    ) if len(
+                        element_name.value
+                    ) > 10 else element_name.value
+                    return json_http_response(
+                        status=400,
+                        given_message="Value «%s» from"
+                        " parameter «&name=%s» is out of range 1-100" % (
+                            answer_string,
+                            answer_string
+                        ),
+                        dbg=request.args.get('dbg', False)
+                    )
+                elif (len(element_name.value) > 0) and (
+                        element_name.value != node_to_update.name
+                ):
+                    node_to_update.name = element_name.value
 
         parent_id = request.args.get('parent', None)
         after_id = request.args.get('after', None)
@@ -572,15 +606,28 @@ def put_organizational_structure_element(id):
             True if x else False for x in (parent_id, after_id, before_id)
         ]
 
-        if dict(Counter(list1).items())[True] >= 2:
-            return json_http_response(
-                status=400,
-                given_message="Submitted more than one from parameters:"
-                " parent, after, before. May be processed only one parameter"
-                " at time. Please, exclude unnecessary parameterы from request"
-                " first.",
-                dbg=request.args.get('dbg', False)
-            )
+        test = dict(Counter(list1).items())
+
+        if True in test.keys():
+            if test[True] >= 1 and not node_to_update.movable:
+                return json_http_response(
+                    status=403,
+                    given_message="Element «%s» with id=%s is prohibited from"
+                    " moving to another elements" % (
+                        node_to_update.name,
+                        node_to_update.id
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif test[True] >= 2:
+                return json_http_response(
+                    status=400,
+                    given_message="Submitted more than one from parameters:"
+                    " parent, after, before. May be processed only one"
+                    " parameter at time. Please, exclude unnecessary"
+                    " parameters from request first.",
+                    dbg=request.args.get('dbg', False)
+                )
 
         try:
             if parent_id:
@@ -604,27 +651,31 @@ def put_organizational_structure_element(id):
         except Exception as error:
             return error.args[0]
 
-        node_schema = OrganizationalStructureSchema(only=["name", "links"])
-        node_dump = node_schema.dump(node_to_update)
-
         if db.session.dirty:
             db.session.commit()
+
+            node_schema = OrganizationalStructureSchema()
+            node_dump = node_schema.dump(node_to_update)
 
             output_json = {
                 "message": "Successfully updated element"
                 " «%s»" % (old_node_name),
-                "links": node_dump['links'],
+                "node": node_dump,
                 "responseType": "Success",
                 "status": 200
             }
         else:
+
+            node_schema = OrganizationalStructureSchema()
+            node_dump = node_schema.dump(node_to_update)
+
             output_json = {
-                "message": "Element «%s» is stay unchanged, because you"
-                " did not submit data or submitted data is the same" % (
-                    old_node_name
-                ),
+                "message": "Element «%s» is stay unchanged by one of the"
+                " reasons: 1. you did not submit data 2. submitted data is"
+                " the same as old 3. element information update is not"
+                " allowed" % (old_node_name),
                 "links": node_dump['links'],
-                "responseType": "Success",
+                "responseType": "Info",
                 "status": 304
             }
 

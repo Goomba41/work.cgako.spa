@@ -87,8 +87,43 @@ export default {
     structureLoad(){
       return axios.get('/API/v1.0.0/organization/structure/elements?dbg=true')
         .then((response) => {
-          console.log(response.data);
-          this.structure = new Tree(response.data);
+          // console.log(response.data);
+
+          function _dfs(oldNode) {
+            var newNode = {}
+
+            for (var k in oldNode) {
+              if (k !== 'children' && k !== 'parent') {
+                var value
+                if (k === "deletable") {
+                  value = Boolean(oldNode[k])
+                  newNode["delNodeDisabled"] = !value
+                } else if (k === "movable") {
+                  value = Boolean(oldNode[k])
+                  newNode["dragDisabled"] = !value
+                } else if (k === "type") {
+                  if (oldNode[k] === 1) {
+                    newNode["isLeaf"] = false
+                  } else if (oldNode[k] === 2) {
+                    newNode["isLeaf"] = true
+                  }
+                } else {
+                  newNode[k] = oldNode[k]
+                }
+              }
+            }
+
+            if (oldNode.children && oldNode.children.length > 0) {
+              newNode.children = []
+              for (var i = 0, len = oldNode.children.length; i < len; i++) {
+                newNode.children.push(_dfs(oldNode.children[i]))
+              }
+            }
+            return newNode
+          }
+
+          // this.structure = new Tree(response.data);
+          this.structure = _dfs(new Tree(response.data));
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -147,12 +182,13 @@ export default {
    onAddNode(params) {
      return axios.post(`/API/v1.0.0/organization/structure/elements?dbg=true&type=${params.isLeaf ? 2 : 1}&parent=${params.pid}`)
        .then((response) => {
-         params.id = response.data.id;
-         if (response.data.type === 2) {
+         params.id = response.data.node.id;
+         if (response.data.node.type === 2) {
            params.isLeaf = true;
          } else {
            params.isLeaf = false;
          }
+         params.name = response.data.node.name
          console.log(response.data);
        })
        .catch((error) => {
@@ -172,7 +208,11 @@ export default {
 
        for (var k in oldNode) {
          if (k !== 'children' && k !== 'parent') {
-           newNode[k] = oldNode[k]
+           if (k === "deletable") {
+             newNode["delNodeDisabled"] = !!+oldNode[k]
+           } else {
+             newNode[k] = oldNode[k]
+           }
          }
        }
 
