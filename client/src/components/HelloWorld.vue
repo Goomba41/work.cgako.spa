@@ -30,7 +30,7 @@
     <div style="margin-top: 3rem;">
       <vue-tree-list
         @click="onClick"
-        @change-name="onChangeName"
+        @change-name="onClick"
         @delete-node="onDel"
         @add-node="onAddNode"
         @drop="onDrop"

@@ -23,6 +23,7 @@ def get_organizational_structure():
         exclusions_list = request.args.get('exclude')
         columns_list = request.args.get('columns')
         orders_list = request.args.get('order_by')
+        # ----------------------------------------------------------------------
 
         # Forming dumping parameters
         dump_params = {}
@@ -52,6 +53,7 @@ def get_organizational_structure():
             return error.args[0]
 
         schema = OrganizationalStructureSchema(**dump_params)
+        # ----------------------------------------------------------------------
 
         # If request has filters, then we request individual instances
         # of elements from database without nesting,
@@ -81,6 +83,7 @@ def get_organizational_structure():
                 json=True,
                 json_fields=schema.dump
             )
+        # ----------------------------------------------------------------------
 
         response = Response(
             response=json.dumps(tree),
@@ -104,6 +107,7 @@ def get_organizational_structure_element(id):
         exclusions_list = request.args.get('exclude')
         columns_list = request.args.get('columns')
         drilldown = request.args.get('drilldown', False)
+        # ----------------------------------------------------------------------
 
         # Forming dumping parameters
         dump_params = {}
@@ -128,23 +132,22 @@ def get_organizational_structure_element(id):
 
         # Make schema with dumping parameters
         item_schema = OrganizationalStructureSchema(**dump_params)
+        # ----------------------------------------------------------------------
 
-        # Querying database for entity by id
         item = OrganizationalStructure.query.get(id)
 
-        # Check variable type
+        # Check variable type and if type is correct and value is True
+        # return drilled element, else dump to json by schema
         check = variable_type_check(drilldown, bool)
 
-        # If type is correct and value is true
         if check.result and check.value:
-            # Return drilled element
             item_json = item.drilldown_tree(
                 json=True,
                 json_fields=item_schema.dump
             )
         else:
-            # Else dumping it to json by schema
             item_json = item_schema.dump(item)
+        # ----------------------------------------------------------------------
 
         response = Response(
             response=json.dumps(item_json),
@@ -172,6 +175,7 @@ def post_organizational_structure_element():
     """
     try:
         # Get parameters from request
+        # Check element type (should be a number and 1-2 range)
         element_type = variable_type_check(request.args.get('type', 1), int)
         if not element_type.result:
             return json_http_response(
@@ -193,7 +197,9 @@ def post_organizational_structure_element():
                 ),
                 dbg=request.args.get('dbg', False)
             )
-
+        # ----------------------------------------------------------------------
+        # Check parent id (should be a number, this parent should be exsiting
+        # in database and should be insertable; default is root element)
         parent_id = variable_type_check(request.args.get('parent', 1), int)
         if not parent_id.result:
             return json_http_response(
@@ -230,7 +236,9 @@ def post_organizational_structure_element():
                     ),
                     dbg=request.args.get('dbg', False)
                 )
-
+        # ----------------------------------------------------------------------
+        # Check name parameter (should be a string in range 1-100, default name
+        # is choosen depending on type)
         name = variable_type_check(request.args.get('name', '').strip(), str)
         if not name.result:
             return json_http_response(
@@ -264,8 +272,9 @@ def post_organizational_structure_element():
             )
         else:
             name = name.value
-
+        # ----------------------------------------------------------------------
         # Get object state parameters from request and change if necessary
+        # Check insertable state (boolean)
         element_insertable = variable_type_check(
             request.args.get('insertable', True),
             bool
@@ -283,7 +292,8 @@ def post_organizational_structure_element():
             )
         else:
             insertable = element_insertable.value
-
+        # ----------------------------------------------------------------------
+        # Check updatable state (boolean)
         element_updatable = variable_type_check(
             request.args.get('updatable', True),
             bool
@@ -301,7 +311,8 @@ def post_organizational_structure_element():
             )
         else:
             updatable = element_updatable.value
-
+        # ----------------------------------------------------------------------
+        # Check movable state (boolean)
         element_movable = variable_type_check(
             request.args.get('movable', True),
             bool
@@ -319,7 +330,8 @@ def post_organizational_structure_element():
             )
         else:
             movable = element_movable.value
-
+        # ----------------------------------------------------------------------
+        # Check deletable state (boolean)
         element_deletable = variable_type_check(
             request.args.get('deletable', True),
             bool
@@ -337,9 +349,9 @@ def post_organizational_structure_element():
             )
         else:
             deletable = element_deletable.value
-
-        if ((parent.type == 2 and element_type.value == 2) or
-           (parent.type == 2 and element_type.value == 1)):
+        # ----------------------------------------------------------------------
+        # Check parent type (if department position prohibit adding child node)
+        if parent.type == 2:
             return json_http_response(
                 status=400,
                 given_message="You cannot insert a new element"
@@ -362,6 +374,8 @@ def post_organizational_structure_element():
             db.session.add(node)
             db.session.flush()
 
+            # Before send response, dump newly added element to json and add
+            # his data to response
             node_schema = OrganizationalStructureSchema(
                 only=["id", "name", "links", "type"]
             )
@@ -379,6 +393,7 @@ def post_organizational_structure_element():
                 "responseType": "Success",
                 "status": 200
             }
+            # ------------------------------------------------------------------
 
             response = Response(
                 response=json.dumps(output_json),
@@ -410,6 +425,8 @@ def delete_organizational_structure_element(id):
     """
     try:
 
+        # Check element to be deleted (deletable parameter should be True,
+        # element is not root, and exist)
         node_to_delete = OrganizationalStructure.query.filter(
             OrganizationalStructure.id == id
         ).first()
@@ -437,7 +454,8 @@ def delete_organizational_structure_element(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
-
+        # ----------------------------------------------------------------------
+        # Check recursive parameter (should be a boolean)
         recursive = variable_type_check(
             request.args.get('recursive', False), bool
         )
@@ -452,6 +470,8 @@ def delete_organizational_structure_element(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
+        # If recursive is True, delete element with his child nodes, else move
+        # child nodes to parent of deleted element
         elif recursive.value:
             db.session.delete(node_to_delete)
 
@@ -486,6 +506,7 @@ def delete_organizational_structure_element(id):
                     " database".format(
                         node_to_delete.name
                     )
+        # ----------------------------------------------------------------------
 
         db.session.commit()
 
@@ -512,7 +533,10 @@ def put_organizational_structure_element(id):
     are, then element cannot be of type 2 (department position). Cannot be
     inserted into type 2 element.
     """
+    # Inner function for element checkings and moving
     def elements_moving(id, move_type):
+        # Check id of moved element (should be a number), and if passed check
+        # element parent
         id = variable_type_check(id, int)
         if not id.result:
             return json_http_response(
@@ -526,9 +550,11 @@ def put_organizational_structure_element(id):
                 dbg=request.args.get('dbg', False)
             )
         else:
+            # Get target element
             target = OrganizationalStructure.query.filter(
                 OrganizationalStructure.id == id.value
             ).first()
+            # -
             if not target:
                 raise Exception(json_http_response(
                     status=404,
@@ -538,6 +564,7 @@ def put_organizational_structure_element(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
+            # If element exist check type and move element
             elif move_type == 'inside' and (
                         target.type == 2 or not target.insertable
                     ):
@@ -552,10 +579,14 @@ def put_organizational_structure_element(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
+            # If move type inside and target element not type of 2
+            # and insertable, move inside target
             elif move_type == 'inside' and (
                 node_to_update.parent_id != id.value
             ):
                 node_to_update.move_inside(id.value)
+            # Else if move type is after or before and parent of target
+            # is insertable, move element
             elif target.parent.insertable:
                 if move_type == 'after':
                     node_to_update.move_after(id.value)
@@ -573,6 +604,8 @@ def put_organizational_structure_element(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
+            # ------------------------------------------------------------------
+        # ----------------------------------------------------------------------
 
     try:
         # Check if asked element is exist and he is not root element
@@ -596,17 +629,20 @@ def put_organizational_structure_element(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
-
+        # ----------------------------------------------------------------------
         # Get parameters from request and change if necessary
         element_type = request.args.get('type', None)
         element_name = request.args.get('name', None)
+        # ----------------------------------------------------------------------
 
         # Get object state parameters from request and change if necessary
         element_deletable = request.args.get('deletable', None)
         element_movable = request.args.get('movable', None)
         element_updatable = request.args.get('updatable', None)
         element_insertable = request.args.get('insertable', None)
-
+        # ----------------------------------------------------------------------
+        # Check insertable parameter (should be a boolean) and toggle
+        # if necessary
         if element_insertable:
             element_insertable = variable_type_check(element_insertable, bool)
             if not element_insertable.result:
@@ -622,6 +658,9 @@ def put_organizational_structure_element(id):
                 )
             elif node_to_update.insertable != element_insertable.value:
                 node_to_update.insertable = element_insertable.value
+        # ----------------------------------------------------------------------
+        # Check updatable parameter (should be a boolean) and toggle
+        # if necessary
         if element_updatable:
             element_updatable = variable_type_check(element_updatable, bool)
             if not element_updatable.result:
@@ -637,6 +676,8 @@ def put_organizational_structure_element(id):
                 )
             elif node_to_update.updatable != element_updatable.value:
                 node_to_update.updatable = element_updatable.value
+        # Check movable parameter (should be a boolean) and toggle
+        # if necessary
         if element_movable:
             element_movable = variable_type_check(element_movable, bool)
             if not element_movable.result:
@@ -652,6 +693,8 @@ def put_organizational_structure_element(id):
                 )
             elif node_to_update.movable != element_movable.value:
                 node_to_update.movable = element_movable.value
+        # Check deletable parameter (should be a boolean) and toggle
+        # if necessary
         if element_deletable:
             element_deletable = variable_type_check(element_deletable, bool)
             if not element_deletable.result:
@@ -667,8 +710,12 @@ def put_organizational_structure_element(id):
                 )
             elif node_to_update.deletable != element_deletable.value:
                 node_to_update.deletable = element_deletable.value
+        # ----------------------------------------------------------------------
 
+        # If request has type and name parameters and node is updatable
+        # check parameters and update if necessary
         if (element_type or element_name) and node_to_update.updatable:
+            # Check element type (should be a number in 1-2 range)
             if element_type:
                 element_type = variable_type_check(element_type, int)
                 if not element_type.result:
@@ -703,7 +750,8 @@ def put_organizational_structure_element(id):
                         )
                     else:
                         node_to_update.type = element_type.value
-
+            # ------------------------------------------------------------------
+            # Check element name (should be a string in 1-100 range)
             if element_name:
                 element_name = variable_type_check(element_name.strip(), str)
                 if not element_name.result:
@@ -738,11 +786,14 @@ def put_organizational_structure_element(id):
                         element_name.value != node_to_update.name
                 ):
                     node_to_update.name = element_name.value
+            # ------------------------------------------------------------------
 
+        # Get parameters for moving element in the tree
         parent_id = request.args.get('parent', None)
         after_id = request.args.get('after', None)
         before_id = request.args.get('before', None)
 
+        # Check if more than one parameter sending
         list1 = [
             True if x else False for x in (parent_id, after_id, before_id)
         ]
@@ -750,6 +801,7 @@ def put_organizational_structure_element(id):
         test = dict(Counter(list1).items())
 
         if True in test.keys():
+            # If one parameter sended, check if element movable
             if test[True] >= 1 and not node_to_update.movable:
                 return json_http_response(
                     status=403,
@@ -760,6 +812,8 @@ def put_organizational_structure_element(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 )
+            # ------------------------------------------------------------------
+            # Else if more than or exactly 2 parameters sended, send a error
             elif test[True] >= 2:
                 return json_http_response(
                     status=400,
@@ -769,13 +823,15 @@ def put_organizational_structure_element(id):
                     " parameters from request first.",
                     dbg=request.args.get('dbg', False)
                 )
-
+            # ------------------------------------------------------------------
+        # ----------------------------------------------------------------------
+        # Try move element with inner function
         try:
             if parent_id:
                 elements_moving(parent_id, 'inside')
             if after_id:
-                # ЗДЕСЬ ЕСТЬ БАГ В БИБЛИОТЕКЕ MPTT:
-                # СМЕЩАЕТСЯ НА ОДИН БОЛЬШЕ
+                # HAS MPTT LIBRARY BUG:
+                # MOVING TOO FAR LEFT
                 # https://github.com/uralbash/sqlalchemy_mptt/issues/67
                 # elements_moving(after_id, 'after')
                 return json_http_response(
@@ -785,13 +841,15 @@ def put_organizational_structure_element(id):
                     dbg=request.args.get('dbg', False)
                 )
             if before_id:
-                # ЗДЕСЬ ЕСТЬ БАГ В БИБЛИОТЕКЕ MPTT:
-                # ПРИ ПЕРЕМЕЩЕНИИ НА САМУЮ ЛЕВУЮ ПОЗИЦИЮ НИЧЕГО НЕ ПРОИСХОДИТ
+                # HAS MPTT LIBRARY BUG:
+                # AFTER MOVE ON LEFTMOST POSITION NOTHING HAPPEND
                 # https://github.com/uralbash/sqlalchemy_mptt/issues/68
                 elements_moving(before_id, 'before')
         except Exception as error:
             return error.args[0]
+        # ----------------------------------------------------------------------
 
+        # If session has changes then commit it form output message
         if db.session.dirty:
             db.session.commit()
 
@@ -805,6 +863,7 @@ def put_organizational_structure_element(id):
                 "responseType": "Success",
                 "status": 200
             }
+        # Else just form output message
         else:
 
             node_schema = OrganizationalStructureSchema()
@@ -819,6 +878,7 @@ def put_organizational_structure_element(id):
                 "responseType": "Info",
                 "status": 304
             }
+        # ----------------------------------------------------------------------
 
         response = Response(
             response=json.dumps(output_json),
