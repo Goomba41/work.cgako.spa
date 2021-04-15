@@ -35,7 +35,6 @@
         @add-node="onAddNode"
         @drop="onDrop"
         @drop-before="onDropBefore"
-        @drop-after="onDropAfter"
         :model="structure"
         default-tree-node-name="new node"
         default-leaf-node-name="new leaf"
@@ -53,12 +52,8 @@
         <span class="icon" slot="leafNodeIcon">🍃</span>
         <span class="icon" slot="treeNodeIcon">🌲</span>
       </vue-tree-list>
-      <button @click="getNewTree">Get new tree</button>
-      <pre>
-        {{newTree}}
-      </pre>
     </div>
-
+    {{structure}}
   </div>
 </template>
 
@@ -76,7 +71,6 @@ export default {
   },
   data() {
     return {
-      newTree: {},
       structure: new Tree([])
     }
   },
@@ -87,11 +81,8 @@ export default {
     structureLoad(){
       return axios.get('/API/v1.0.0/organization/structure/elements?dbg=true')
         .then((response) => {
-          // console.log(response.data);
-
           function _dfs(oldNode) {
             var newNode = {}
-
             for (var k in oldNode) {
               if (k !== 'children' && k !== 'parent') {
                 var value
@@ -122,8 +113,11 @@ export default {
             return newNode
           }
 
-          // this.structure = new Tree(response.data);
-          this.structure = _dfs(new Tree(response.data));
+          this.structure = new Tree(
+            [
+              _dfs(response.data[0])
+            ]
+          );
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -132,11 +126,11 @@ export default {
     },
 
     onDrop(node){
-      console.log(node.node.id + ' into '  + node.target.id);
+      // console.log(node.node.id + ' into '  + node.target.id);
       return axios.put(`/API/v1.0.0/organization/structure/elements/${node.node.id}?dbg=true&parent=${node.target.id}`)
         .then((response) => {
           console.log(response.data);
-          // node.node.moveInto(node.target);
+          node.node.moveInto(node.target);
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -145,11 +139,11 @@ export default {
     },
 
     onDropBefore(node){
-      console.log(node.node.id + ' before '  + node.target.id);
+      // console.log(node.node.id + ' before '  + node.target.id);
       return axios.put(`/API/v1.0.0/organization/structure/elements/${node.node.id}?dbg=true&before=${node.target.id}`)
         .then((response) => {
           console.log(response.data);
-          // node.node.moveBefore(node.target);
+          node.node.moveBefore(node.target);
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -157,13 +151,8 @@ export default {
         });
     },
 
-    // Не понятно как используется
-    onDropAfter(node){
-      console.log('after ' + node.target.id);
-    },
-
     onDel(node) {
-     console.log(node.id)
+     // console.log(node.id)
      return axios.delete(`/API/v1.0.0/organization/structure/elements/${node.id}?dbg=true`)
        .then((response) => {
          console.log(response.data);
@@ -180,6 +169,7 @@ export default {
    },
 
    onAddNode(params) {
+     // console.log(params)
      return axios.post(`/API/v1.0.0/organization/structure/elements?dbg=true&type=${params.isLeaf ? 2 : 1}&parent=${params.pid}`)
        .then((response) => {
          params.id = response.data.node.id;
@@ -233,20 +223,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+  h3 {
+    margin: 40px 0 0;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  a {
+    color: #42b983;
+  }
 </style>
 
 <style lang="scss" rel="stylesheet/sass">

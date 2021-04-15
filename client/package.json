@@ -10,8 +10,8 @@
   "dependencies": {
     "axios": "^0.21.1",
     "bootstrap-vue": "^2.21.2",
-    "core-js": "^3.6.5",
-    "vue": "^2.6.11",
+    "core-js": "^3.10.1",
+    "vue": "^2.6.12",
     "vue-axios": "^3.2.4",
     "vue-i18n": "^8.24.2",
     "vue-router": "^3.5.1",
@@ -20,15 +20,24 @@
     "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
+    "@babel/polyfill": "^7.11.5",
+    "@vue/cli-plugin-babel": "~4.5.12",
+    "@vue/cli-plugin-eslint": "~4.5.12",
+    "@vue/cli-plugin-router": "~4.5.0",
+    "@vue/cli-plugin-vuex": "~4.5.0",
+    "@vue/cli-service": "~4.5.12",
     "babel-eslint": "^10.1.0",
+    "bootstrap": "^4.5.2",
     "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.9.0",
+    "mutationobserver-shim": "^0.3.7",
     "node-sass": "^5.0.0",
+    "popper.js": "^1.16.1",
+    "portal-vue": "^2.1.7",
+    "sass": "^1.26.11",
     "sass-loader": "^10.0.5",
-    "vue-template-compiler": "^2.6.11"
+    "vue-cli-plugin-bootstrap-vue": "~0.7.0",
+    "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
     "root": true,

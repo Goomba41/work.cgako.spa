@@ -1,6 +1,7 @@
 """Views of API version 1.0.0: User profile."""
 
 from flask import Response, json, request, url_for
+from flask_babel import _
 from collections import Counter
 
 from .blueprint import APIv1_0_0
@@ -9,12 +10,14 @@ from app.models import OrganizationalStructure
 from app.schemas import OrganizationalStructureSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
     marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
-    sqlalchemy_orders_converter, pagination_of_list, variable_type_check
+    sqlalchemy_orders_converter, pagination_of_list, variable_type_check, \
+    language_detect
 
 
 @APIv1_0_0.route('/organization/structure', methods=['GET'])
 @APIv1_0_0.route('/organization/structure/elements', methods=['GET'])
 # @token_required
+@language_detect
 def get_organizational_structure():
     """Get organizational structure tree."""
     try:
@@ -100,6 +103,7 @@ def get_organizational_structure():
 
 @APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['GET'])
 # @token_required
+@language_detect
 def get_organizational_structure_element(id):
     """Get organizational structure element."""
     try:
@@ -134,7 +138,18 @@ def get_organizational_structure_element(id):
         item_schema = OrganizationalStructureSchema(**dump_params)
         # ----------------------------------------------------------------------
 
+        # Query item from database, and if is not none make action
         item = OrganizationalStructure.query.get(id)
+        if not item:
+
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Element with id=%(id)s doesn't exist in database",
+                    id=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
         # Check variable type and if type is correct and value is True
         # return drilled element, else dump to json by schema
@@ -434,8 +449,12 @@ def delete_organizational_structure_element(id):
         if not node_to_delete.deletable:
             return json_http_response(
                 status=403,
-                given_message="Element «%s» with id=%s is prohibited from "
-                " deleting" % (node_to_delete.name, node_to_delete.id),
+                given_message=_(
+                    "Element «%(name)s» with id=%(id)s is prohibited from"
+                    " deleting",
+                    name=node_to_delete.name,
+                    id=node_to_delete.id
+                ),
                 dbg=request.args.get('dbg', False)
             )
 

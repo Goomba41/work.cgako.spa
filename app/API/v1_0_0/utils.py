@@ -6,6 +6,7 @@ from distutils.util import strtobool
 from urllib.parse import urljoin
 from sqlalchemy.inspection import inspect
 from collections import namedtuple
+from functools import wraps
 
 import math
 import traceback
@@ -543,3 +544,13 @@ def variable_type_check(value, type):
         else:
             return TypeCheck(True, type.__name__, value)
     return TypeCheck(False, type.__name__, value)
+
+
+def language_detect(function):
+    """Language detection for i18n decorator."""
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print("language detection before function call")
+        print(request.host)
+        return function(*args, **kwargs)
+    return wrapper
