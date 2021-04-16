@@ -2,6 +2,7 @@
 
 from random import SystemRandom
 from flask import Response, json, request, current_app as app
+from flask_babel import _
 from distutils.util import strtobool
 from urllib.parse import urljoin
 from sqlalchemy.inspection import inspect
@@ -64,29 +65,30 @@ def json_http_response(dbg=False, given_message=None, status=500):
     """
     # Defining message and response type depending on status
     if status in (400, 401, 403, 404, 500):
-        response_type = 'Error'
+        response_type = _('Error')
         if status == 400:
-            message = 'Bad request!'
+            message = _('Bad request!')
         if status == 401:
-            message = 'Unauthorized!'
+            message = _('Unauthorized!')
         if status == 403:
-            message = 'Forbidden'
+            message = _('Forbidden')
         if status == 404:
-            message = 'Not found!'
+            message = _('Not found!')
         if status == 500:
-            message = 'Internal server error!'
+            message = _('Internal server error!')
     elif status in (200, 201):
-        response_type = 'Success'
+        response_type = _('Success')
         if status == 200:
             message = 'OK!'
         if status == 201:
-            message = 'Created!'
+            message = _('Created!')
     elif status in (304,):
-        response_type = 'Warning'
-        message = 'Not modified!'
+        response_type = _('Warning')
+        message = _('Not modified!')
     else:
-        response_type = 'Info'
-        message = 'I don`t know what to say! Probably this is test response?'
+        response_type = _('Info')
+        message = _('I don`t know what to say! Probably this'
+                    'is test response?')
 
     info = {
         'responseType': response_type,
@@ -108,8 +110,10 @@ def json_http_response(dbg=False, given_message=None, status=500):
                 if sys.exc_info()[2]:
                     info['debugInfo'] = traceback.format_exc()
         except Exception:
-            info['debugInfo'] = "Debugging info is turned off, because "\
+            info['debugInfo'] = _(
+                "Debugging info is turned off, because "
                 "incorrect type of parameter 'dbg' (should be boolean)"
+            )
 
     return Response(
         response=json.dumps(info),
@@ -173,11 +177,11 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
         except Exception:
             raise Exception(json_http_response(
                 status=400,
-                given_message="Parsing error of list of filters «%s» from"
-                " parameter «&filter=%s». Be sure that fields separated"
-                " by comma." % (
-                    filter_parameters,
-                    filter_parameters
+                given_message=_(
+                    "Parsing error of list of filters «%(filters)s» from"
+                    " parameter «&filter=%(filters)s». Be sure that fields"
+                    " separated by comma.",
+                    filters=filter_parameters
                 ),
                 dbg=request.args.get('dbg', False)
             ))
@@ -192,17 +196,22 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
                 # for reraising it in parent function
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Invalid filter «%s» (should be "
-                    "«filter=<column>:<operator>:<value>»)" % (parameter),
+                    given_message=_(
+                        "Invalid filter «%(filter)s» (should be"
+                        " «filter=<column>:<operator>:<value>»)",
+                        filter=parameter
+                    ),
                     dbg=request.args.get('dbg', False)
                 ))
             if op not in dict_filtros_op:
+                variants = ', '.join(list(dict_filtros_op.keys()))
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Invalid filter operator «%s» (possible"
-                    " variants is: %s)" % (
-                        op,
-                        ', '.join(list(dict_filtros_op.keys()))
+                    given_message=_(
+                        "Invalid filter operator «%(operator)s» (possible"
+                        " variants is: %(variants)s",
+                        operator=parameter,
+                        variants=variants
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -213,11 +222,12 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
             if not column:
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Column «%s» from filter «%s» "
-                    "doesn't exist in model «%s»" % (
-                        column_name,
-                        parameter,
-                        model.__name__
+                    given_message=_(
+                        "Column «%(column)s» from filter «%(filter)s»"
+                        " doesn't exist in model «%(model)s»",
+                        column=column_name,
+                        filter=parameter,
+                        model=model.__name__
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -229,10 +239,11 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
                 except Exception:
                     raise Exception(json_http_response(
                         status=400,
-                        given_message="Error of translating value «%s» to"
-                        " list of values (in case of «in» operator <value>"
-                        " must be string of values, delimited by «,»)" % (
-                            value
+                        given_message=_(
+                            "Error of translating value «%(value)s» to"
+                            " list of values (in case of «in» operator <value>"
+                            " must be string of values, delimited by «,»)",
+                            value=value
                         ),
                         dbg=request.args.get('dbg', False)
                     ))
@@ -247,8 +258,10 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
                 except Exception:
                     raise Exception(json_http_response(
                         status=400,
-                        given_message="Error of translating filter"
-                        " operator «%s»" % (parameter),
+                        given_message=_(
+                            "Error of translating filter operator «%(op)s»",
+                            op=parameter
+                        ),
                         dbg=request.args.get('dbg', False)
                     ))
     return filters_list
@@ -269,11 +282,11 @@ def sqlalchemy_orders_converter(model, order_parameters=[]):
         except Exception:
             raise Exception(json_http_response(
                 status=400,
-                given_message="Parsing error of list of orderings «%s» from"
-                " parameter «&order_by=%s». Be sure that fields separated"
-                " by comma." % (
-                    order_parameters,
-                    order_parameters
+                given_message=_(
+                    "Parsing error of list of orderings «%(value)s» from"
+                    " parameter «&order_by=%(value)s». Be sure that fields"
+                    " separated by comma.",
+                    value=order_parameters
                 ),
                 dbg=request.args.get('dbg', False)
             ))
@@ -286,16 +299,23 @@ def sqlalchemy_orders_converter(model, order_parameters=[]):
                 # for reraising it in parent function
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Invalid order parameter «%s» (should be "
-                    "«order_by=<column>:<direction>»)" % (order),
+                    given_message=_(
+                        "Invalid order parameter «%(value)s» (should be"
+                        "«order_by=<column>:<direction>»)",
+                        value=order
+                    ),
                     dbg=request.args.get('dbg', False)
                 ))
             if direction.lower() not in ["asc", "desc"]:
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Invalid order direction «%s» in order"
-                    " parameter «%s» (possible"
-                    " variants is: «acs», «desc»)" % (direction, order),
+                    given_message=_(
+                        "Invalid order direction «%(direction)s» in order"
+                        " parameter «%(order)s» (possible"
+                        " variants is: «acs», «desc»)",
+                        direction=direction,
+                        order=order
+                    ),
                     dbg=request.args.get('dbg', False)
                 ))
 
@@ -304,11 +324,12 @@ def sqlalchemy_orders_converter(model, order_parameters=[]):
             if not column:
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Column «%s» from order parameter «%s» "
-                    "doesn't exist in model «%s» " % (
-                        column_name,
-                        order,
-                        model.__name__
+                    given_message=_(
+                        "Column «%(column)s» from order parameter «%(order)s»"
+                        " doesn't exist in model «%(model)s»",
+                        column=column_name,
+                        order=order,
+                        model=model.__name__
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -322,8 +343,11 @@ def sqlalchemy_orders_converter(model, order_parameters=[]):
             except Exception:
                 raise Exception(json_http_response(
                     status=400,
-                    given_message="Error of translating order by"
-                    " operator «%s»" % (order),
+                    given_message=_(
+                        "Error of translating order by"
+                        " operator «%(operator)s»",
+                        operator=order
+                    ),
                     dbg=request.args.get('dbg', False)
                 ))
 
@@ -346,11 +370,11 @@ def marshmallow_only_fields_converter(model, only_fields_parameters=[]):
     except Exception:
         raise Exception(json_http_response(
             status=400,
-            given_message="Parsing error of list of columns «%s» from"
-            " parameter «&columns=%s». Be sure that fields separated"
-            " by comma." % (
-                only_fields_parameters,
-                only_fields_parameters
+            given_message=_(
+                "Parsing error of list of columns «%(only)s» from"
+                " parameter «&columns=%(only)s». Be sure that fields separated"
+                " by comma.",
+                only=only_fields_parameters
             ),
             dbg=request.args.get('dbg', False)
         ))
@@ -358,11 +382,12 @@ def marshmallow_only_fields_converter(model, only_fields_parameters=[]):
         if not class_attribute_existence(model, column):
             raise Exception(json_http_response(
                 status=400,
-                given_message="Column «%s» from column parameter "
-                "«&column=%s» doesn't exist in model «%s»" % (
-                    column.split(".")[-1],
-                    column,
-                    model.__name__
+                given_message=_(
+                    "Column «%(items)s» from column parameter "
+                    "«&column=%(columns)s» doesn't exist in model «%(model)s»",
+                    items=column.split(".")[-1],
+                    columns=column,
+                    model=model.__name__
                 ),
                 dbg=request.args.get('dbg', False)
             ))
@@ -394,11 +419,11 @@ def marshmallow_excluding_converter(model, exclusions_parameters=[]):
     except Exception:
         raise Exception(json_http_response(
             status=400,
-            given_message="Parsing error of list of exclusions «%s» from"
-            " parameter «&exclude=%s». Be sure that fields separated"
-            " by comma." % (
-                exclusions_parameters,
-                exclusions_parameters
+            given_message=_(
+                "Parsing error of list of exclusions «%(items)s» from "
+                "parameter «&exclude=%(items)s». Be sure that fields separated"
+                " by comma.",
+                items=exclusions_parameters
             ),
             dbg=request.args.get('dbg', False)
         ))
@@ -406,11 +431,12 @@ def marshmallow_excluding_converter(model, exclusions_parameters=[]):
         if not class_attribute_existence(model, exclude):
             raise Exception(json_http_response(
                 status=400,
-                given_message="Column «%s» from exclude parameter "
-                "«&exclude=%s» doesn't exist in model «%s»" % (
-                    exclude.split(".")[-1],
-                    exclude,
-                    model.__name__
+                given_message=_(
+                    "Column «%(column)s» from exclude parameter "
+                    "«&exclude=%(items)s» doesn't exist in model «%(model)s»",
+                    column=exclude.split(".")[-1],
+                    items=exclude,
+                    model=model.__name__
                 ),
                 dbg=request.args.get('dbg', False)
             ))

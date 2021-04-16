@@ -195,20 +195,21 @@ def post_organizational_structure_element():
         if not element_type.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&type=%s» is not type of «%s»" % (
-                    element_type.value,
-                    element_type.value,
-                    element_type.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&type=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=element_type.value,
+                    type=element_type.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
         elif element_type.value not in range(1, 3, 1):
             return json_http_response(
                 status=400,
-                given_message="The type submitted parameter"
-                " «&type=%s» is does not exist" % (
-                    element_type.value
+                given_message=_(
+                    "The type submitted in parameter"
+                    " «&type=%(value)s» is does not exist",
+                    value=element_type.value,
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -219,11 +220,11 @@ def post_organizational_structure_element():
         if not parent_id.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&parent=%s» is not type of «%s»" % (
-                    parent_id.value,
-                    parent_id.value,
-                    parent_id.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&type=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=parent_id.value,
+                    type=parent_id.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -234,20 +235,23 @@ def post_organizational_structure_element():
             if not parent:
                 return json_http_response(
                     status=404,
-                    given_message="The parent submitted parameter"
-                    " «&parent=%s» is does not exist" % (
-                        parent_id.value
+                    given_message=_(
+                        "The parent submitted in parameter"
+                        " «&parent=%(value)s» is does not exist",
+                        value=parent_id.value,
                     ),
                     dbg=request.args.get('dbg', False)
                 )
             elif parent.type != 1 or not parent.insertable:
                 return json_http_response(
                     status=403,
-                    given_message="Element cannot be inserted into parent «%s»"
-                    " with id=%s: parent is the position of the department,"
-                    " or insertion into the parent is prohibited" % (
-                        parent.name,
-                        parent_id.value
+                    given_message=_(
+                        "Element cannot be inserted into parent «%(name)s»"
+                        " with id=%(value)s: parent is the position of the ,"
+                        " department or insertion into the parent"
+                        " is prohibited",
+                        name=parent.name,
+                        value=parent_id.value,
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -258,24 +262,28 @@ def post_organizational_structure_element():
         if not name.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&name=%s» is not type of «%s»" % (
-                    name.value,
-                    name.value,
-                    name.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&name=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=name.value,
+                    type=name.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
         if len(name.value) > 100:
             answer_string = str(
-                name.value[:10]
-            )+"..." if len(name.value) > 10 else name.value
+                name.value[:5]
+            )+"..."+str(
+                name.value[-5:]
+            ) if len(
+                name.value
+            ) > 10 else name.value
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&name=%s» is out of range 1-100" % (
-                    answer_string,
-                    answer_string
+                given_message=_(
+                    "Value «%(value)s» from parameter «&name=%(value)s»"
+                    " is out of range 1-100",
+                    value=answer_string
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -297,11 +305,11 @@ def post_organizational_structure_element():
         if not element_insertable.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&insertable=%s» is not type of «%s»" % (
-                    element_insertable.value,
-                    element_insertable.value,
-                    element_insertable.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&insertable=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=element_insertable.value,
+                    type=element_insertable.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -316,11 +324,11 @@ def post_organizational_structure_element():
         if not element_updatable.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&updatable=%s» is not type of «%s»" % (
-                    element_updatable.value,
-                    element_updatable.value,
-                    element_updatable.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&updatable=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=element_updatable.value,
+                    type=element_updatable.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -335,11 +343,11 @@ def post_organizational_structure_element():
         if not element_movable.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&movable=%s» is not type of «%s»" % (
-                    element_movable.value,
-                    element_movable.value,
-                    element_movable.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&movable=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=element_movable.value,
+                    type=element_movable.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -354,11 +362,11 @@ def post_organizational_structure_element():
         if not element_deletable.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&deletable=%s» is not type of «%s»" % (
-                    element_deletable.value,
-                    element_deletable.value,
-                    element_deletable.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&deletable=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=element_deletable.value,
+                    type=element_deletable.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -369,10 +377,11 @@ def post_organizational_structure_element():
         if parent.type == 2:
             return json_http_response(
                 status=400,
-                given_message="You cannot insert a new element"
-                " «%s» under a position «%s»" % (
-                    name,
-                    parent.name,
+                given_message=_(
+                    "You cannot insert a new element «%(name)s»"
+                    " under a position «%(parent)s»",
+                    name=name,
+                    parent=parent.name
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -395,17 +404,17 @@ def post_organizational_structure_element():
                 only=["id", "name", "links", "type"]
             )
             node_dump = node_schema.dump(node)
-            print(node_dump)
             db.session.commit()
 
             output_json = {
-                "message": "Successfully inserted element"
-                " «%s» under a element «%s»" % (
-                    name,
-                    parent.name,
+                "message": _(
+                    "Successfully inserted element «%(name)s»"
+                    " under a element «%(parent)s»",
+                    name=name,
+                    parent=parent.name
                 ),
                 "node": node_dump,
-                "responseType": "Success",
+                "responseType": _("Success"),
                 "status": 200
             }
             # ------------------------------------------------------------------
@@ -461,15 +470,20 @@ def delete_organizational_structure_element(id):
         if node_to_delete is None:
             return json_http_response(
                 status=404,
-                given_message="Element to delete with id=%s is not exist"
-                " in database" % (id),
+                given_message=_(
+                    "Element to delete with id=%(value)s"
+                    " is not exist in database",
+                    value=id
+                ),
                 dbg=request.args.get('dbg', False)
             )
         elif node_to_delete.id == 1 or node_to_delete.left == 1:
             return json_http_response(
                 status=400,
-                given_message="Root element «%s» cannot be deleted" % (
-                    node_to_delete.name
+                given_message=_(
+                    "Root element «%(name)s»"
+                    " cannot be deleted",
+                    name=node_to_delete.name
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -481,11 +495,11 @@ def delete_organizational_structure_element(id):
         if not recursive.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&recursive=%s» is not type of «%s»" % (
-                    recursive.value,
-                    recursive.value,
-                    recursive.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&recursive=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=recursive.value,
+                    type=recursive.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -495,15 +509,17 @@ def delete_organizational_structure_element(id):
             db.session.delete(node_to_delete)
 
             if len(node_to_delete.children):
-                given_message = "Element «{0}» successfully deleted from" \
-                    " database with all children elements".format(
-                        node_to_delete.name
-                    )
+                given_message = _(
+                    "Element «%(name)s» successfully deleted from"
+                    " database with all children elements",
+                    name=node_to_delete.name
+                )
             else:
-                given_message = "Element «{0}» successfully deleted from" \
-                    " database".format(
-                        node_to_delete.name
-                    )
+                given_message = _(
+                    "Element «%(name)s» successfully deleted from"
+                    " database",
+                    name=node_to_delete.name
+                )
         else:
             if len(node_to_delete.children):
                 # Moving child to parent of root element
@@ -514,17 +530,18 @@ def delete_organizational_structure_element(id):
 
                 # And then delete root element
                 db.session.delete(node_to_delete)
-                given_message = "Element «{0}» successfully deleted from" \
-                    " database. All children elements moved to top" \
-                    " level".format(
-                        node_to_delete.name
-                    )
+                given_message = _(
+                    "Element «%(name)s» successfully deleted from"
+                    " database. All children elements moved to top level",
+                    name=node_to_delete.name
+                )
             else:
                 db.session.delete(node_to_delete)
-                given_message = "Element «{0}» successfully deleted from" \
-                    " database".format(
-                        node_to_delete.name
-                    )
+                given_message = _(
+                    "Element «%(name)s» successfully deleted from"
+                    " database",
+                    name=node_to_delete.name
+                )
         # ----------------------------------------------------------------------
 
         db.session.commit()
@@ -560,11 +577,11 @@ def put_organizational_structure_element(id):
         if not id.result:
             return json_http_response(
                 status=400,
-                given_message="Value «%s» from"
-                " parameter «&parent=%s» is not type of «%s»" % (
-                    id.value,
-                    id.value,
-                    id.type
+                given_message=_(
+                    "Value «%(value)s» from parameter «&parent=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=id.value,
+                    type=id.type
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -577,9 +594,9 @@ def put_organizational_structure_element(id):
             if not target:
                 raise Exception(json_http_response(
                     status=404,
-                    given_message="The target in one of submitted parameter"
-                    " «&parent=», «&before=», «&after=» is does not exist" % (
-                        id.value
+                    given_message=_(
+                        "The target in one of submitted parameter"
+                        " «&parent», «&before», «&after» is does not exist"
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -589,12 +606,13 @@ def put_organizational_structure_element(id):
                     ):
                 raise Exception(json_http_response(
                     status=403,
-                    given_message="Unable to move element with id=%s to"
-                    " element with id=%s: target element is of type 2"
-                    " (department position cannot have children) or insertion"
-                    " into target item is not allowed" % (
-                        node_to_update.id,
-                        target.id
+                    given_message=_(
+                        "Unable to move element with id=%(id)s to element"
+                        " with id=%(target_id)s: target element is of type 2"
+                        " (department position cannot have children)"
+                        " or insertion into target item is not allowed",
+                        id=node_to_update.id,
+                        target_id=target.id
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -614,12 +632,14 @@ def put_organizational_structure_element(id):
             else:
                 raise Exception(json_http_response(
                     status=403,
-                    given_message="Unable to move element with id=%s before or"
-                    " after element with id=%s: insertion into target element"
-                    " parent with id=%s is not allowed" % (
-                        node_to_update.id,
-                        target.id,
-                        target.parent.id
+                    given_message=_(
+                        "Unable to move element with id=%(id)s before or"
+                        " after element with id=%(target_id)s: insertion into"
+                        " target element parent with id=%(target_parent_id)s"
+                        " is not allowed",
+                        id=node_to_update.id,
+                        target_id=target.id,
+                        target_parent_id=target.parent.id
                     ),
                     dbg=request.args.get('dbg', False)
                 ))
@@ -636,15 +656,19 @@ def put_organizational_structure_element(id):
         if node_to_update is None:
             return json_http_response(
                 status=404,
-                given_message="Element to update with id=%s is not exist"
-                " in database" % (id),
+                given_message=_(
+                    "Element to update with id=%(id)s is not exist"
+                    " in database",
+                    id=id
+                ),
                 dbg=request.args.get('dbg', False)
             )
         elif node_to_update.id == 1 or node_to_update.left == 1:
             return json_http_response(
                 status=400,
-                given_message="Root element «%s» cannot be updated" % (
-                    node_to_update.name
+                given_message=_(
+                    "Root element «%(name)s» cannot be updated",
+                    name=node_to_update.name
                 ),
                 dbg=request.args.get('dbg', False)
             )
@@ -667,11 +691,11 @@ def put_organizational_structure_element(id):
             if not element_insertable.result:
                 return json_http_response(
                     status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&insertable=%s» is not type of «%s»" % (
-                        element_insertable.value,
-                        element_insertable.value,
-                        element_insertable.type
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&insertable=%(value)s» is not type of «%(type)s»",
+                        value=element_insertable.value,
+                        type=element_insertable.type
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -685,11 +709,11 @@ def put_organizational_structure_element(id):
             if not element_updatable.result:
                 return json_http_response(
                     status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&updatable=%s» is not type of «%s»" % (
-                        element_updatable.value,
-                        element_updatable.value,
-                        element_updatable.type
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&updatable=%(value)s» is not type of «%(type)s»",
+                        value=element_updatable.value,
+                        type=element_updatable.type
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -702,11 +726,11 @@ def put_organizational_structure_element(id):
             if not element_movable.result:
                 return json_http_response(
                     status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&movable=%s» is not type of «%s»" % (
-                        element_movable.value,
-                        element_movable.value,
-                        element_movable.type
+                    given_message=_(
+                        "Value «%(value)s» from parameter «&movable=%(value)s»"
+                        " is not type of «%(type)s»",
+                        value=element_movable.value,
+                        type=element_movable.type
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -719,11 +743,11 @@ def put_organizational_structure_element(id):
             if not element_deletable.result:
                 return json_http_response(
                     status=400,
-                    given_message="Value «%s» from"
-                    " parameter «&deletable=%s» is not type of «%s»" % (
-                        element_deletable.value,
-                        element_deletable.value,
-                        element_deletable.type
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&deletable=%(value)s» is not type of «%(type)s»",
+                        value=element_deletable.value,
+                        type=element_deletable.type
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -740,20 +764,21 @@ def put_organizational_structure_element(id):
                 if not element_type.result:
                     return json_http_response(
                         status=400,
-                        given_message="Value «%s» from"
-                        " parameter «&type=%s» is not type of «%s»" % (
-                            element_type.value,
-                            element_type.value,
-                            element_type.type
+                        given_message=_(
+                            "Value «%(value)s» from parameter"
+                            " «&type=%(value)s» is not type of «%(type)s»",
+                            value=element_type.value,
+                            type=element_type.type
                         ),
                         dbg=request.args.get('dbg', False)
                     )
                 elif element_type.value not in range(1, 3, 1):
                     return json_http_response(
                         status=400,
-                        given_message="The type submitted parameter"
-                        " «&type=%s» is does not exist" % (
-                            element_type.value
+                        given_message=_(
+                            "The type submitted in parameter"
+                            " «&type=%(value)s» is does not exist",
+                            value=element_type.value
                         ),
                         dbg=request.args.get('dbg', False)
                     )
@@ -761,10 +786,13 @@ def put_organizational_structure_element(id):
                     if len(node_to_update.children):
                         return json_http_response(
                             status=400,
-                            given_message="Cannot change type of element with"
-                            " id=%s to type 2 (department position) because he"
-                            " has child elements. Move child elements under"
-                            " other element first." % (node_to_update.id),
+                            given_message=_(
+                                "Cannot change type of element with"
+                                " id=%(id)s to type 2 (department position)"
+                                "because he has child elements. Move child"
+                                "elements under other element first.",
+                                id=node_to_update.id
+                            ),
                             dbg=request.args.get('dbg', False)
                         )
                     else:
@@ -776,11 +804,11 @@ def put_organizational_structure_element(id):
                 if not element_name.result:
                     return json_http_response(
                         status=400,
-                        given_message="Value «%s» from"
-                        " parameter «&name=%s» is not type of «%s»" % (
-                            element_name.value,
-                            element_name.value,
-                            element_name.type
+                        given_message=_(
+                            "Value «%(value)s» from parameter"
+                            " «&name=%(value)s» is not type of «%(type)s»",
+                            value=element_name.value,
+                            type=element_name.type
                         ),
                         dbg=request.args.get('dbg', False)
                     )
@@ -794,10 +822,10 @@ def put_organizational_structure_element(id):
                     ) > 10 else element_name.value
                     return json_http_response(
                         status=400,
-                        given_message="Value «%s» from"
-                        " parameter «&name=%s» is out of range 1-100" % (
-                            answer_string,
-                            answer_string
+                        given_message=_(
+                            "Value «%(value)s» from parameter"
+                            " «&name=%(value)s» is out of range 1-100",
+                            value=answer_string
                         ),
                         dbg=request.args.get('dbg', False)
                     )
@@ -824,10 +852,11 @@ def put_organizational_structure_element(id):
             if test[True] >= 1 and not node_to_update.movable:
                 return json_http_response(
                     status=403,
-                    given_message="Element «%s» with id=%s is prohibited from"
-                    " moving to another elements" % (
-                        node_to_update.name,
-                        node_to_update.id
+                    given_message=_(
+                        "Element «%(name)s» with id=%(id)s is prohibited"
+                        " from moving to another elements",
+                        name=node_to_update.name,
+                        id=node_to_update.id
                     ),
                     dbg=request.args.get('dbg', False)
                 )
@@ -836,10 +865,12 @@ def put_organizational_structure_element(id):
             elif test[True] >= 2:
                 return json_http_response(
                     status=400,
-                    given_message="Submitted more than one from parameters:"
-                    " parent, after, before. May be processed only one"
-                    " parameter at time. Please, exclude unnecessary"
-                    " parameters from request first.",
+                    given_message=_(
+                        "Submitted more than one from parameters: parent,"
+                        "after, before. May be processed only one parameter"
+                        "at time. Please, exclude unnecessary parameters"
+                        "from request first."
+                    ),
                     dbg=request.args.get('dbg', False)
                 )
             # ------------------------------------------------------------------
@@ -855,8 +886,9 @@ def put_organizational_structure_element(id):
                 # elements_moving(after_id, 'after')
                 return json_http_response(
                     status=400,
-                    given_message="Function is bugged, so temporarly does"
-                    " not work",
+                    given_message=_(
+                        "Function is bugged, so temporarly does not work"
+                    ),
                     dbg=request.args.get('dbg', False)
                 )
             if before_id:
@@ -876,10 +908,12 @@ def put_organizational_structure_element(id):
             node_dump = node_schema.dump(node_to_update)
 
             output_json = {
-                "message": "Successfully updated element"
-                " «%s»" % (old_node_name),
+                "message": _(
+                    "Successfully updated element «%(name)s»",
+                    name=old_node_name
+                ),
                 "node": node_dump,
-                "responseType": "Success",
+                "responseType": _("Success"),
                 "status": 200
             }
         # Else just form output message
@@ -889,12 +923,15 @@ def put_organizational_structure_element(id):
             node_dump = node_schema.dump(node_to_update)
 
             output_json = {
-                "message": "Element «%s» is stay unchanged by one of the"
-                " reasons: 1. you did not submit data 2. submitted data is"
-                " the same as old 3. element information update is not"
-                " allowed" % (old_node_name),
+                "message": _(
+                    "Element «%(name)s» is stay unchanged by one of the"
+                    " reasons: 1. you did not submit data 2. submitted data is"
+                    " the same as old 3. element information update is not"
+                    " allowed",
+                    name=old_node_name
+                ),
                 "links": node_dump['links'],
-                "responseType": "Info",
+                "responseType": _("Info"),
                 "status": 304
             }
         # ----------------------------------------------------------------------

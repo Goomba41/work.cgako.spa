@@ -1,0 +1,453 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2021 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-04-16 14:13+0300\n"
+"PO-Revision-Date: 2021-04-15 15:53+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: app/API/v1_0_0/organizational_structure.py:147
+#, python-format
+msgid "Element with id=%(id)s doesn't exist in database"
+msgstr "Элемент с id=%(id)s не существует в базе данных"
+
+#: app/API/v1_0_0/organizational_structure.py:198
+#: app/API/v1_0_0/organizational_structure.py:223
+#: app/API/v1_0_0/organizational_structure.py:767
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&type=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&type=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:209
+#: app/API/v1_0_0/organizational_structure.py:778
+#, python-format
+msgid "The type submitted in parameter «&type=%(value)s» is does not exist"
+msgstr "Тип, отправленный в параметре «&type=%(value)s» не существует в системе"
+
+#: app/API/v1_0_0/organizational_structure.py:238
+#, python-format
+msgid "The parent submitted in parameter «&parent=%(value)s» is does not exist"
+msgstr ""
+"Родительский элемент, отправленный в параметре «&parent=%(value)s» не "
+"существует в базе данных"
+
+#: app/API/v1_0_0/organizational_structure.py:248
+#, python-format
+msgid ""
+"Element cannot be inserted into parent «%(name)s» with id=%(value)s: "
+"parent is the position of the , department or insertion into the parent "
+"is prohibited"
+msgstr ""
+"Элемент не может быть добавлен к элементу «%(name)s» с id=%(value)s: "
+"целевой элемент является должностью , или вставка в целевой элемент "
+"запрещена"
+
+#: app/API/v1_0_0/organizational_structure.py:265
+#: app/API/v1_0_0/organizational_structure.py:807
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&name=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&name=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:283
+#: app/API/v1_0_0/organizational_structure.py:825
+#, python-format
+msgid "Value «%(value)s» from parameter «&name=%(value)s» is out of range 1-100"
+msgstr ""
+"Значение «%(value)s» параметра «&name=%(value)s» должно быть в пределах "
+"1-100 символов"
+
+#: app/API/v1_0_0/organizational_structure.py:308
+#: app/API/v1_0_0/organizational_structure.py:694
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&insertable=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&insertable=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:327
+#: app/API/v1_0_0/organizational_structure.py:712
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&updatable=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&updatable=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:346
+#: app/API/v1_0_0/organizational_structure.py:729
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&movable=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&movable=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:365
+#: app/API/v1_0_0/organizational_structure.py:746
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&deletable=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&deletable=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:380
+#, python-format
+msgid "You cannot insert a new element «%(name)s» under a position «%(parent)s»"
+msgstr "Нельзя вставить новый элемент «%(name)s» под должность «%(parent)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:410
+#, python-format
+msgid "Successfully inserted element «%(name)s» under a element «%(parent)s»"
+msgstr "Успешно вставлен элемент «%(name)s» под элемент «%(parent)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:417
+#: app/API/v1_0_0/organizational_structure.py:916 app/API/v1_0_0/utils.py:80
+msgid "Success"
+msgstr "Успех"
+
+#: app/API/v1_0_0/organizational_structure.py:461
+#, python-format
+msgid "Element «%(name)s» with id=%(id)s is prohibited from deleting"
+msgstr "Элемент «%(name)s» с id=%(id)s запрещено удалять"
+
+#: app/API/v1_0_0/organizational_structure.py:473
+#, python-format
+msgid "Element to delete with id=%(value)s is not exist in database"
+msgstr "Элемент для удаления с id=%(value)s не существует в базе данных"
+
+#: app/API/v1_0_0/organizational_structure.py:483
+#, python-format
+msgid "Root element «%(name)s» cannot be deleted"
+msgstr "Корневой элемент «%(name)s» не может быть удален"
+
+#: app/API/v1_0_0/organizational_structure.py:498
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&recursive=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&recursive=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:512
+#, python-format
+msgid ""
+"Element «%(name)s» successfully deleted from database with all children "
+"elements"
+msgstr ""
+"Элемент «%(name)s» успешно удален из базы данных вместе со всеми "
+"внутреннимиэлементами"
+
+#: app/API/v1_0_0/organizational_structure.py:518
+#: app/API/v1_0_0/organizational_structure.py:540
+#, python-format
+msgid "Element «%(name)s» successfully deleted from database"
+msgstr "Элемент «%(name)s» успешно удален из базы данных"
+
+#: app/API/v1_0_0/organizational_structure.py:533
+#, python-format
+msgid ""
+"Element «%(name)s» successfully deleted from database. All children "
+"elements moved to top level"
+msgstr ""
+"Элемент «%(name)s» успешно удален из базы данных. Все внутренние элементы"
+" перемещены на уровень выше"
+
+#: app/API/v1_0_0/organizational_structure.py:580
+#, python-format
+msgid ""
+"Value «%(value)s» from parameter «&parent=%(value)s» is not type of "
+"«%(type)s»"
+msgstr ""
+"Значение «%(value)s» параметра «&parent=%(value)s» не является типом "
+"«%(type)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:597
+msgid ""
+"The target in one of submitted parameter «&parent», «&before», «&after» "
+"is does not exist"
+msgstr ""
+"Целевой элемент в одном из параметров: «&parent», «&before», «&after» не "
+"существует в базе данных"
+
+#: app/API/v1_0_0/organizational_structure.py:609
+#, python-format
+msgid ""
+"Unable to move element with id=%(id)s to element with id=%(target_id)s: "
+"target element is of type 2 (department position cannot have children) or"
+" insertion into target item is not allowed"
+msgstr ""
+"Невозможно переместить элемент с id=%(id)s в элемент с id=%(target_id)s: "
+"целевой элемент является должностью (не может иметь внутренних элементов)"
+" или вставка в целевой элемент запрещена"
+
+#: app/API/v1_0_0/organizational_structure.py:635
+#, python-format
+msgid ""
+"Unable to move element with id=%(id)s before or after element with "
+"id=%(target_id)s: insertion into target element parent with "
+"id=%(target_parent_id)s is not allowed"
+msgstr ""
+"Невозможно переместить элемент с id=%(id)s на позицию перед или после "
+"элемента с id=%(target_id)s: вставка в родителя целевого элемента с "
+"id=%(target_parent_id)s запрещена"
+
+#: app/API/v1_0_0/organizational_structure.py:659
+#, python-format
+msgid "Element to update with id=%(id)s is not exist in database"
+msgstr "Элемент для обновления с id=%(id)s не существует в базе данных"
+
+#: app/API/v1_0_0/organizational_structure.py:669
+#, python-format
+msgid "Root element «%(name)s» cannot be updated"
+msgstr "Корневой элемент «%(name)s» не может быть изменен"
+
+#: app/API/v1_0_0/organizational_structure.py:789
+#, python-format
+msgid ""
+"Cannot change type of element with id=%(id)s to type 2 (department "
+"position)because he has child elements. Move childelements under other "
+"element first."
+msgstr ""
+"Невозможно изменить тип элемента с id=%(id)s на должность так как он "
+"имеет внутренние элементы. Сначала переместите внутренние элементы в "
+"другой элемент."
+
+#: app/API/v1_0_0/organizational_structure.py:855
+#, python-format
+msgid ""
+"Element «%(name)s» with id=%(id)s is prohibited from moving to another "
+"elements"
+msgstr "Элемент «%(name)s» с id=%(id)s запрещено перемещать под другие элементы"
+
+#: app/API/v1_0_0/organizational_structure.py:868
+msgid ""
+"Submitted more than one from parameters: parent,after, before. May be "
+"processed only one parameterat time. Please, exclude unnecessary "
+"parametersfrom request first."
+msgstr ""
+"Отправлен более чем один из параметров: parent, after, before. Возможно "
+"обработать только один параметр за запрос. Пожалуйста, исключите ненужные"
+" параметры из запроса."
+
+#: app/API/v1_0_0/organizational_structure.py:889
+msgid "Function is bugged, so temporarly does not work"
+msgstr "Функция имеет баги, поэтому временно отключена"
+
+#: app/API/v1_0_0/organizational_structure.py:911
+#, python-format
+msgid "Successfully updated element «%(name)s»"
+msgstr "Успешно обновлен элемент «%(name)s»"
+
+#: app/API/v1_0_0/organizational_structure.py:926
+#, python-format
+msgid ""
+"Element «%(name)s» is stay unchanged by one of the reasons: 1. you did "
+"not submit data 2. submitted data is the same as old 3. element "
+"information update is not allowed"
+msgstr ""
+"Элемент «%(name)s» остался неизменным по одной из причин: 1. не "
+"отправлены данные 2. отправленные данные совпадают с имеющимися 3. "
+"обновление информации об элементе запрещено"
+
+#: app/API/v1_0_0/organizational_structure.py:934 app/API/v1_0_0/utils.py:89
+msgid "Info"
+msgstr "Информация"
+
+#: app/API/v1_0_0/utils.py:68
+msgid "Error"
+msgstr "Ошибка"
+
+#: app/API/v1_0_0/utils.py:70
+msgid "Bad request!"
+msgstr "Некорректный запрос!"
+
+#: app/API/v1_0_0/utils.py:72
+msgid "Unauthorized!"
+msgstr "Не авторизован!"
+
+#: app/API/v1_0_0/utils.py:74
+msgid "Forbidden"
+msgstr "Запрещено"
+
+#: app/API/v1_0_0/utils.py:76
+msgid "Not found!"
+msgstr "Не найдено"
+
+#: app/API/v1_0_0/utils.py:78
+msgid "Internal server error!"
+msgstr "Внутренняя ошибка сервера"
+
+#: app/API/v1_0_0/utils.py:84
+msgid "Created!"
+msgstr "Создано!"
+
+#: app/API/v1_0_0/utils.py:86
+msgid "Warning"
+msgstr "Предупреждение"
+
+#: app/API/v1_0_0/utils.py:87
+msgid "Not modified!"
+msgstr "Не изменено!"
+
+#: app/API/v1_0_0/utils.py:90
+msgid "I don`t know what to say! Probably thisis test response?"
+msgstr "Незнаю, что ответить! Возможно это тестовый запрос?"
+
+#: app/API/v1_0_0/utils.py:113
+msgid ""
+"Debugging info is turned off, because incorrect type of parameter 'dbg' "
+"(should be boolean)"
+msgstr ""
+"Отладочная информация отключена из-за некорректного параметра 'dbg' "
+"(должен быть типа boolean)"
+
+#: app/API/v1_0_0/utils.py:180
+#, python-format
+msgid ""
+"Parsing error of list of filters «%(filters)s» from parameter "
+"«&filter=%(filters)s». Be sure that fields separated by comma."
+msgstr ""
+"Ошибка разбора списка фильтров «%(filters)s» из параметра "
+"«&filter=%(filters)s». Убедитесь, что поля разделены запятой."
+
+#: app/API/v1_0_0/utils.py:199
+#, python-format
+msgid ""
+"Invalid filter «%(filter)s» (should be "
+"«filter=<column>:<operator>:<value>»)"
+msgstr ""
+"Некорректный фильтр «%(filter)s» (должен быть вида "
+"«filter=<столбец>:<оператор>:<значение>»)"
+
+#: app/API/v1_0_0/utils.py:210
+#, python-format
+msgid "Invalid filter operator «%(operator)s» (possible variants is: %(variants)s"
+msgstr "Некорректный оператор «%(operator)s» в фильтре (возможные варианты: %(variants)s"
+
+#: app/API/v1_0_0/utils.py:225
+#, python-format
+msgid ""
+"Column «%(column)s» from filter «%(filter)s» doesn't exist in model "
+"«%(model)s»"
+msgstr ""
+"Столбец «%(column)s» из фильтра «%(filter)s» не существует в модели "
+"«%(model)s»"
+
+#: app/API/v1_0_0/utils.py:242
+#, python-format
+msgid ""
+"Error of translating value «%(value)s» to list of values (in case of «in»"
+" operator <value> must be string of values, delimited by «,»)"
+msgstr ""
+"Ошибка трансляции значения «%(value)s» в список значений (в случае «in»"
+" оператор <значение> должен быть строковым списком значений, разделенных «,»)"
+
+#: app/API/v1_0_0/utils.py:261
+#, python-format
+msgid "Error of translating filter operator «%(op)s»"
+msgstr "Ошибка трансляции оператора «%(op)s» в фильтре"
+
+#: app/API/v1_0_0/utils.py:285
+#, python-format
+msgid ""
+"Parsing error of list of orderings «%(value)s» from parameter "
+"«&order_by=%(value)s». Be sure that fields separated by comma."
+msgstr ""
+"Ошибка разбора списка сортировок «%(value)s» из параметра "
+"«&order_by=%(value)s». Убедитесь, что поля разделены запятой."
+
+#: app/API/v1_0_0/utils.py:302
+#, python-format
+msgid ""
+"Invalid order parameter «%(value)s» (should "
+"be«order_by=<column>:<direction>»)"
+msgstr ""
+"Некорректный параметр сортировки «%(value)s» (должен "
+"быть вида «order_by=<столбец>:<направление_сортировки>»)"
+
+#: app/API/v1_0_0/utils.py:312
+#, python-format
+msgid ""
+"Invalid order direction «%(direction)s» in order parameter «%(order)s» "
+"(possible variants is: «acs», «desc»)"
+msgstr ""
+"Некорректное направление сортировки «%(direction)s» в параметре сортировки «%(order)s» "
+"(возможные варианты: «acs» (возр.), «desc» (убыв.))"
+
+#: app/API/v1_0_0/utils.py:327
+#, python-format
+msgid ""
+"Column «%(column)s» from order parameter «%(order)s» doesn't exist in "
+"model «%(model)s»"
+msgstr ""
+"Стобец «%(column)s» из параметра сортировки «%(order)s» не существует в "
+"модели «%(model)s»"
+
+#: app/API/v1_0_0/utils.py:346
+#, python-format
+msgid "Error of translating order by operator «%(operator)s»"
+msgstr "Ошибка трансляции оператора сортировки «%(operator)s»"
+
+#: app/API/v1_0_0/utils.py:373
+#, python-format
+msgid ""
+"Parsing error of list of columns «%(only)s» from parameter "
+"«&columns=%(only)s». Be sure that fields separated by comma."
+msgstr ""
+"Ошибка разбора списка столбцов «%(only)s» из параметра "
+"«&columns=%(only)s». Убедитесь, что поля разделены запятой."
+
+#: app/API/v1_0_0/utils.py:388
+#, python-format
+msgid ""
+"Column «%(items)s» from column parameter «&column=%(columns)s» doesn't "
+"exist in model «%(model)s»"
+msgstr ""
+"Столбец «%(items)s» из параметра столбцов «&column=%(columns)s» не "
+"существует в модели «%(model)s»"
+
+#: app/API/v1_0_0/utils.py:422
+#, python-format
+msgid ""
+"Parsing error of list of exclusions «%(items)s» from parameter "
+"«&exclude=%(items)s». Be sure that fields separated by comma."
+msgstr ""
+"Ошибка разбора списка исключений «%(items)s» из параметра "
+"«&exclude=%(items)s». Убедитесь, что поля разделены запятой."
+
+#: app/API/v1_0_0/utils.py:437
+#, python-format
+msgid ""
+"Column «%(column)s» from exclude parameter «&exclude=%(items)s» doesn't "
+"exist in model «%(model)s»"
+msgstr ""
+"Столбец «%(column)s» из параметра исключений «&exclude=%(items)s» не "
+"существует в модели «%(model)s»"
