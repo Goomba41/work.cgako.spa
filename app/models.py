@@ -25,12 +25,12 @@ class OrganizationalStructure(db.Model, BaseNestedSets):
     updatable = db.Column(db.SmallInteger, comment="Обновляемый?", default=1)
     insertable = db.Column(db.SmallInteger, comment="Потомки?", default=1)
 
-    users = db.relationship(
-        'Users',
-        backref='position',
-        lazy='dynamic',
-        uselist=True
-    )
+    # users = db.relationship(
+    #     'Users',
+    #     backref='position',
+    #     lazy='dynamic',
+    #     uselist=True
+    # )
 
     def __repr__(self):
         """Class representation string."""
@@ -81,22 +81,22 @@ class Users(db.Model):
         comment="Статус записи пользователя"
     )
 
-    company_position = db.Column(
-        db.Integer,
-        db.ForeignKey(
-            # "innerInformationSystem_System.organizational_structure.id"
-            # Приводит к багу
-            "organizational_structure.id"
-        ),
-        nullable=False,
-        comment="Должность"
-    )
-
-    role = db.Column(
-        db.Integer,
-        db.ForeignKey("innerInformationSystem_System.roles.id"),
-        comment="Системная роль пользователя"
-    )
+    # company_position = db.Column(
+    #     db.Integer,
+    #     db.ForeignKey(
+    #         # "innerInformationSystem_System.organizational_structure.id"
+    #         # Приводит к багу
+    #         "organizational_structure.id"
+    #     ),
+    #     nullable=False,
+    #     comment="Должность"
+    # )
+    #
+    # role = db.Column(
+    #     db.Integer,
+    #     db.ForeignKey("innerInformationSystem_System.roles.id"),
+    #     comment="Системная роль пользователя"
+    # )
 
     # def __init__(self, login, password,
     #              name, surname, patronymic,
@@ -132,6 +132,68 @@ class Users(db.Model):
         return 'User with login: %r ' % (self.login)
 
 
+class ModulesTypes(db.Model):
+    """
+    Modules types model.
+
+    Static DB table. Just GET and PUT methods.
+    """
+
+    __tablename__ = 'modules_types'
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        comment="Уникальный идентификатор"
+    )
+    name = db.Column(db.String(50), comment="Имя типа модуля")
+    code = db.Column(db.String(36), comment="Уникальный код")
+
+    modules = db.relationship(
+        'Modules',
+        backref='type',
+        lazy='dynamic',
+        uselist=True
+    )
+
+    def __repr__(self):
+        """Class representation string."""
+        return 'Module type «%r»' % (self.name)
+
+
+class Modules(db.Model):
+    """
+    Modules model.
+
+    Static DB table. Just GET and PUT methods.
+    """
+
+    __tablename__ = 'modules'
+    __table_args__ = {'schema': 'innerInformationSystem_System'}
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        comment="Уникальный идентификатор"
+    )
+    name = db.Column(db.String(50), comment="Имя модуля")
+    description = db.Column(db.String(256), comment="Короткое описание модуля")
+    version = db.Column(db.String(9), comment="Версия модуля")
+    code = db.Column(db.String(36), comment="Уникальный код")
+
+    module_type_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "modules_types.id"
+        ),
+        nullable=False,
+        comment="Тип модуля"
+    )
+
+    def __repr__(self):
+        """Class representation string."""
+        return 'Module «%r»' % (self.name)
+
+
 class Roles(db.Model):
     """System roles model."""
 
@@ -139,7 +201,7 @@ class Roles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
 
-    users = db.relationship('Users', backref='roles', lazy='dynamic')
+    # users = db.relationship('Users', backref='roles', lazy='dynamic')
 # permission = db.relationship('Permission', backref='role', lazy='dynamic')
 
     def __repr__(self):

@@ -10,14 +10,12 @@ from app.models import OrganizationalStructure
 from app.schemas import OrganizationalStructureSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
     marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
-    sqlalchemy_orders_converter, pagination_of_list, variable_type_check, \
-    language_detect
+    sqlalchemy_orders_converter, pagination_of_list, variable_type_check
 
 
 @APIv1_0_0.route('/organization/structure', methods=['GET'])
 @APIv1_0_0.route('/organization/structure/elements', methods=['GET'])
 # @token_required
-@language_detect
 def get_organizational_structure():
     """Get organizational structure tree."""
     try:
@@ -103,7 +101,6 @@ def get_organizational_structure():
 
 @APIv1_0_0.route('/organization/structure/elements/<int:id>', methods=['GET'])
 # @token_required
-@language_detect
 def get_organizational_structure_element(id):
     """Get organizational structure element."""
     try:

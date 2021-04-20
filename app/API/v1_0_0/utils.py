@@ -7,7 +7,7 @@ from distutils.util import strtobool
 from urllib.parse import urljoin
 from sqlalchemy.inspection import inspect
 from collections import namedtuple
-from functools import wraps
+# from functools import wraps
 
 import math
 import traceback
@@ -128,20 +128,29 @@ def class_attribute_existence(exclude_model, exclude_fields):
         x.strip() for x in
         exclude_fields.split(".")
     ]
-    for item in exclude_fields:
-        i = inspect(exclude_model).relationships
-        referred_classes = [r.mapper.class_ for r in i]
-        for cls in referred_classes:
-            if cls.__tablename__ and cls.__tablename__ == item:
-                return class_attribute_existence(
-                    cls, '.'.join(exclude_fields[1:])
-                )
-            elif cls.__tablename__ != item and len(exclude_fields) > 1:
-                continue
-            elif not hasattr(exclude_model, item) and len(exclude_fields) == 1:
-                return False
-            else:
-                return True
+    if len(exclude_fields) == 1:
+        if hasattr(exclude_model, exclude_fields[0]):
+            return True
+        else:
+            return False
+    else:
+        for item in exclude_fields:
+            i = inspect(exclude_model).relationships
+            referred_classes = [r.mapper.class_ for r in i]
+            for cls in referred_classes:
+                if cls.__tablename__ and cls.__tablename__ == item:
+                    return class_attribute_existence(
+                        cls, '.'.join(exclude_fields[1:])
+                    )
+                elif cls.__tablename__ != item and len(exclude_fields) > 1:
+                    continue
+                elif not hasattr(
+                    exclude_model,
+                    item
+                ) and len(exclude_fields) == 1:
+                    return False
+                else:
+                    return True
     return False
 
 
@@ -571,12 +580,13 @@ def variable_type_check(value, type):
             return TypeCheck(True, type.__name__, value)
     return TypeCheck(False, type.__name__, value)
 
+# Example of decorator
 
-def language_detect(function):
-    """Language detection for i18n decorator."""
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        print("language detection before function call")
-        print(request.host)
-        return function(*args, **kwargs)
-    return wrapper
+# def language_detect(function):
+#     """Language detection for i18n decorator."""
+#     @wraps(function)
+#     def wrapper(*args, **kwargs):
+#         print("language detection before function call")
+#         print(request.host)
+#         return function(*args, **kwargs)
+#     return wrapper

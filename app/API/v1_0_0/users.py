@@ -4,7 +4,7 @@ from flask import Response, json, request, url_for
 
 from app.API.v1_0_0.blueprint import APIv1_0_0
 from app.models import Users
-from app.schemas import UsersSchema
+from app.schemas import UsersBaseSchema
 from .utils import json_http_response, sqlalchemy_filters_converter,\
     sqlalchemy_orders_converter, pagination_of_list,\
     marshmallow_excluding_converter, marshmallow_only_fields_converter
@@ -32,11 +32,7 @@ def get_users():
         exclusions_list = request.args.get('exclude')
         columns_list = request.args.get('columns')
 
-        exclusions_default = [
-            'roles.users',
-            'position.users',
-            'position.parent.users',
-        ]
+        exclusions_default = []
 
         # Forming dumping parameters
         dump_params = {}
@@ -71,7 +67,7 @@ def get_users():
         # Querying database with filters and ordering lists
         users = Users.query.filter(*filters_list).order_by(*orders_list).all()
         # And dumping it to json by schema
-        users_schema = UsersSchema(
+        users_schema = UsersBaseSchema(
             many=True,
             **dump_params
         )
@@ -141,7 +137,7 @@ def get_user(id):
         user = Users.query.get(id)
         # And dumping it to json by schema
         # (with the addition of excluded and only fields)
-        user_schema = UsersSchema(**dump_params)
+        user_schema = UsersBaseSchema(**dump_params)
 
         user_json = user_schema.dump(user)
 
