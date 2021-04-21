@@ -263,6 +263,8 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
                         lambda e: hasattr(column, e % dict_filtros_op[op]),
                         ['%s', '%s_', '__%s__']
                     ))[0] % dict_filtros_op[op]
+                    if dict_filtros_op[op] == 'like':
+                        value = f"%{value}%"
                     filters_list.append(getattr(column, attr)(value))
                 except Exception:
                     raise Exception(json_http_response(
@@ -492,9 +494,9 @@ def pagination_of_list(query_result, url, query_params):
         try:
             limit = int(limit)
         except ValueError:
-            limit = 10
+            limit = app.config['LIMIT']
     elif limit < 1:
-        limit = 10
+        limit = app.config['LIMIT']
 
     if records_count < start and records_count != 0:
         start = records_count
