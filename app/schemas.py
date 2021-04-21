@@ -40,18 +40,6 @@ class UsersBaseSchema(ModelSchema):
     )
 
 
-# class UsersStructureSchema(UsersBaseSchema):
-#     """System user serialization schema."""
-#
-#     class Meta:
-#         """Metadata."""
-#
-#         exclude = ("position", "last_login", "about_me", "password",
-#                    "roles.users", "socials")
-
-    # roles = ma.Nested(RolesSchema)
-
-
 class OrganizationalStructureSchema(ModelSchema):
     """Departments positions serialization schema."""
 
@@ -68,7 +56,6 @@ class OrganizationalStructureSchema(ModelSchema):
         lambda: OrganizationalStructureSchema(exclude=("parent", "children",)),
         many=True
     )
-    # users = ma.Nested(UsersStructureSchema, many=True)
 
     links = ma.Hyperlinks(
         {
@@ -88,39 +75,30 @@ class OrganizationalStructureSchema(ModelSchema):
     )
 
 
-# class UsersSchema(UsersBaseSchema):
-#     """System user serialization schema."""
-    #
-    # position = ma.Nested(
-    #     OrganizationalStructureSchema
-    # )
-    # roles = ma.Nested(RolesSchema)
-
-
-class ModulesSchema(ModelSchema):
-    """Models serialization schema."""
+class ModulesBaseSchema(ModelSchema):
+    """Models base serialization schema."""
 
     class Meta:
         """Metadata."""
 
         model = Modules
 
-    links = ma.Hyperlinks(
-        {
-            "self": ma.URLFor(
-                "APIv1_0_0.get_modules_item",
-                values=dict(
-                    id="<id>", _external=True
-                )
-            ),
-            "collection": ma.URLFor(
-                "APIv1_0_0.get_modules",
-                values=dict(
-                    _external=True
-                )
-            ),
-        }
-    )
+        links = ma.Hyperlinks(
+            {
+                "self": ma.URLFor(
+                    "APIv1_0_0.get_modules_item",
+                    values=dict(
+                        id="<id>", _external=True
+                    )
+                ),
+                "collection": ma.URLFor(
+                    "APIv1_0_0.get_modules",
+                    values=dict(
+                        _external=True
+                    )
+                ),
+            }
+        )
 
 
 class ModulesTypesSchema(ModelSchema):
@@ -131,7 +109,7 @@ class ModulesTypesSchema(ModelSchema):
 
         model = ModulesTypes
 
-    modules = ma.Nested(ModulesSchema, many=True)
+    modules = ma.Nested(ModulesBaseSchema, many=True)
 
     links = ma.Hyperlinks(
         {
@@ -149,3 +127,9 @@ class ModulesTypesSchema(ModelSchema):
             ),
         }
     )
+
+
+class ModulesSchema(ModulesBaseSchema):
+    """Models serialization schema."""
+
+    type = ma.Nested(ModulesTypesSchema(exclude=("modules",)))

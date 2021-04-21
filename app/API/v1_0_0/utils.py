@@ -265,6 +265,7 @@ def sqlalchemy_filters_converter(model, filter_parameters=[]):
                     ))[0] % dict_filtros_op[op]
                     if dict_filtros_op[op] == 'like':
                         value = f"%{value}%"
+                    # problem with backref relationship
                     filters_list.append(getattr(column, attr)(value))
                 except Exception:
                     raise Exception(json_http_response(

@@ -25,13 +25,6 @@ class OrganizationalStructure(db.Model, BaseNestedSets):
     updatable = db.Column(db.SmallInteger, comment="Обновляемый?", default=1)
     insertable = db.Column(db.SmallInteger, comment="Потомки?", default=1)
 
-    # users = db.relationship(
-    #     'Users',
-    #     backref='position',
-    #     lazy='dynamic',
-    #     uselist=True
-    # )
-
     def __repr__(self):
         """Class representation string."""
         return 'Structure element «%r» of type «%r»' % (self.name, self.type)
@@ -48,31 +41,15 @@ class Users(db.Model):
         comment="Уникальный идентификатор"
     )
     login = db.Column(db.String(20), unique=True, comment="Уникальный логин")
-    password = db.Column(
-        db.JSON(none_as_null=True),
-        comment="Пароль и его параметры"
-    )
-    socials = db.Column(
-        db.JSON(none_as_null=True),
-        comment="Социальные сети"
-    )
     photo = db.Column(db.String(50), comment="Имя файла фотокарточки")
     name = db.Column(db.String(20), comment="Имя")
     surname = db.Column(db.String(20), comment="Фамилия")
     patronymic = db.Column(db.String(20), comment="Отчество")
-    email = db.Column(
-        db.JSON(none_as_null=True),
-        comment="Электронная почта и её параметры"
-    )
-    phone = db.Column(db.String(18), unique=True, comment="Телефон")
+    phone = db.Column(db.String(14), unique=True, comment="Телефон")
     about_me = db.Column(db.Text(), comment="О себе (например, должность)")
 
     birth_date = db.Column(db.Date, comment="Дата рождения")
     employment_date = db.Column(db.Date, comment="Дата трудоустройства")
-    last_login = db.Column(
-        db.JSON(none_as_null=True),
-        comment="Данные последнего входа в систему"
-    )
 
     status = db.Column(
         db.Boolean,
@@ -80,23 +57,6 @@ class Users(db.Model):
         nullable=False,
         comment="Статус записи пользователя"
     )
-
-    # company_position = db.Column(
-    #     db.Integer,
-    #     db.ForeignKey(
-    #         # "innerInformationSystem_System.organizational_structure.id"
-    #         # Приводит к багу
-    #         "organizational_structure.id"
-    #     ),
-    #     nullable=False,
-    #     comment="Должность"
-    # )
-    #
-    # role = db.Column(
-    #     db.Integer,
-    #     db.ForeignKey("innerInformationSystem_System.roles.id"),
-    #     comment="Системная роль пользователя"
-    # )
 
     # def __init__(self, login, password,
     #              name, surname, patronymic,
