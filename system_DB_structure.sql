@@ -24,6 +24,161 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `innerInformationSystem_System` /*!4010
 USE `innerInformationSystem_System`;
 
 --
+-- Table structure for table `actions`
+--
+
+DROP TABLE IF EXISTS `actions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `actions` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Имя действия над объектом',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_permissions_roles`
+--
+
+DROP TABLE IF EXISTS `assignment_permissions_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_permissions_roles` (
+  `permission_id` int NOT NULL,
+  `role_id` int NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  KEY `assignment_permissions_roles_ibfk_2` (`role_id`),
+  KEY `assignment_permissions_roles_ibfk_1` (`permission_id`),
+  CONSTRAINT `assignment_permissions_roles_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_permissions_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Связь разрешений и ролей';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_removed_permissions_users`
+--
+
+DROP TABLE IF EXISTS `assignment_removed_permissions_users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_removed_permissions_users` (
+  `user_assignment_id` int NOT NULL,
+  `permission_id` int NOT NULL,
+  PRIMARY KEY (`user_assignment_id`,`permission_id`),
+  KEY `assignment_removed_permissions_users_ibfk_1` (`permission_id`),
+  KEY `assignment_removed_permissions_users_ibfk_2` (`user_assignment_id`) USING BTREE,
+  CONSTRAINT `assignment_removed_permissions_users_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_removed_permissions_users_ibfk_2` FOREIGN KEY (`user_assignment_id`) REFERENCES `assignment_users_modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_emails`
+--
+
+DROP TABLE IF EXISTS `assignment_users_emails`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_emails` (
+  `user_id` int NOT NULL,
+  `email_id` int NOT NULL,
+  KEY `users_emails_assignment_ibfk_1` (`email_id`),
+  KEY `users_emails_assignment_ibfk_2` (`user_id`),
+  CONSTRAINT `assignment_users_emails_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_emails_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_modules`
+--
+
+DROP TABLE IF EXISTS `assignment_users_modules`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_modules` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT ' Уникальный идентификатор',
+  `user_id` int NOT NULL,
+  `module_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assignment_users_modules_ibfk_1` (`module_id`),
+  KEY `assignment_users_modules_ibfk_2` (`user_id`),
+  CONSTRAINT `assignment_users_modules_ibfk_1` FOREIGN KEY (`module_id`) REFERENCES `modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_modules_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_passwords`
+--
+
+DROP TABLE IF EXISTS `assignment_users_passwords`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_passwords` (
+  `user_id` int NOT NULL,
+  `password_id` int NOT NULL,
+  KEY `users_passwords_assignment_ibfk_1` (`password_id`),
+  KEY `users_passwords_assignment_ibfk_2` (`user_id`),
+  CONSTRAINT `assignment_users_passwords_ibfk_1` FOREIGN KEY (`password_id`) REFERENCES `passwords` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_passwords_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_roles`
+--
+
+DROP TABLE IF EXISTS `assignment_users_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_roles` (
+  `user_assignment_id` int NOT NULL,
+  `role_id` int NOT NULL,
+  PRIMARY KEY (`user_assignment_id`,`role_id`),
+  KEY `assignment_users_roles_ibfk1` (`role_id`),
+  KEY `assignment_users_roles_ibfk2` (`user_assignment_id`),
+  CONSTRAINT `assignment_users_roles_ibfk1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_roles_ibfk2` FOREIGN KEY (`user_assignment_id`) REFERENCES `assignment_users_modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_socials`
+--
+
+DROP TABLE IF EXISTS `assignment_users_socials`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_socials` (
+  `user_id` int NOT NULL,
+  `social_id` int NOT NULL,
+  KEY `assignment_users_socials_ibfk_1` (`social_id`),
+  KEY `assignment_users_socials_ibfk_2` (`user_id`),
+  CONSTRAINT `assignment_users_socials_ibfk_1` FOREIGN KEY (`social_id`) REFERENCES `socials` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_socials_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `assignment_users_structures`
+--
+
+DROP TABLE IF EXISTS `assignment_users_structures`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_users_structures` (
+  `user_id` int NOT NULL,
+  `structure_id` int NOT NULL,
+  KEY `assignment_users_structures_ibfk_1` (`structure_id`),
+  KEY `assignment_users_structures_ibfk_2` (`user_id`),
+  CONSTRAINT `assignment_users_structures_ibfk_1` FOREIGN KEY (`structure_id`) REFERENCES `organizational_structure` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `assignment_users_structures_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `emails`
 --
 
@@ -50,8 +205,22 @@ DROP TABLE IF EXISTS `history`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `history` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `user_id` int NOT NULL,
+  `action_id` int NOT NULL,
+  `object_id` int NOT NULL,
+  `module_id` int NOT NULL,
+  `action_describe` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `make_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `history_ibfk_1` (`user_id`),
+  KEY `history_ibfk_2` (`module_id`),
+  KEY `history_ibfk_3` (`action_id`),
+  KEY `history_ibfk_4` (`object_id`),
+  CONSTRAINT `history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `history_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `history_ibfk_3` FOREIGN KEY (`action_id`) REFERENCES `actions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `history_ibfk_4` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,6 +259,20 @@ CREATE TABLE `modules_types` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `objects`
+--
+
+DROP TABLE IF EXISTS `objects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `objects` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `name` varchar(50) NOT NULL COMMENT 'Имя объекта взаимодействия',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `organizational_structure`
 --
 
@@ -115,7 +298,7 @@ CREATE TABLE `organizational_structure` (
   KEY `organizational_structure_level_idx` (`level`),
   KEY `organizational_structure_lft_idx` (`lft`),
   CONSTRAINT `organizational_structure_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `organizational_structure` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -138,6 +321,25 @@ CREATE TABLE `passwords` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `permissions`
+--
+
+DROP TABLE IF EXISTS `permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permissions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `action_id` int NOT NULL,
+  `object_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_ibfk_1` (`action_id`),
+  KEY `permissions_ibfk_2` (`object_id`),
+  CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `actions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `permissions_ibfk_2` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `roles`
 --
 
@@ -146,8 +348,11 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `module_type_id` int NOT NULL,
   `name` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `roles_ibfk_1` (`module_type_id`),
+  CONSTRAINT `roles_ibfk_1` FOREIGN KEY (`module_type_id`) REFERENCES `modules_types` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -203,4 +408,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-22 11:13:33
+-- Dump completed on 2021-04-22 15:33:03
