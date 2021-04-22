@@ -648,7 +648,6 @@ def put_organizational_structure_element(id):
         node_to_update = OrganizationalStructure.query.filter(
             OrganizationalStructure.id == id
         ).first()
-        old_node_name = node_to_update.name
 
         if node_to_update is None:
             return json_http_response(
@@ -669,6 +668,8 @@ def put_organizational_structure_element(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
+        else:
+            old_node_name = node_to_update.name
         # ----------------------------------------------------------------------
         # Get parameters from request and change if necessary
         element_type = request.args.get('type', None)

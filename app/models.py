@@ -137,7 +137,7 @@ class Modules(db.Model):
     )
     name = db.Column(db.String(50), comment="Имя модуля")
     description = db.Column(db.String(256), comment="Короткое описание модуля")
-    version = db.Column(db.String(9), comment="Версия модуля")
+    version = db.Column(db.String(8), comment="Версия модуля")
     code = db.Column(db.String(36), comment="Уникальный код")
 
     module_type_id = db.Column(

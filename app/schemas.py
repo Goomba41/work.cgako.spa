@@ -83,23 +83,6 @@ class ModulesBaseSchema(ModelSchema):
 
         model = Modules
 
-        links = ma.Hyperlinks(
-            {
-                "self": ma.URLFor(
-                    "APIv1_0_0.get_modules_item",
-                    values=dict(
-                        id="<id>", _external=True
-                    )
-                ),
-                "collection": ma.URLFor(
-                    "APIv1_0_0.get_modules",
-                    values=dict(
-                        _external=True
-                    )
-                ),
-            }
-        )
-
 
 class ModulesTypesSchema(ModelSchema):
     """Models types serialization schema."""
@@ -132,4 +115,25 @@ class ModulesTypesSchema(ModelSchema):
 class ModulesSchema(ModulesBaseSchema):
     """Models serialization schema."""
 
+    class Meta:
+        """Metadata."""
+
+        model = Modules
+
+    links = ma.Hyperlinks(
+        {
+            "self": ma.URLFor(
+                "APIv1_0_0.get_modules_item",
+                values=dict(
+                    id="<id>", _external=True
+                )
+            ),
+            "collection": ma.URLFor(
+                "APIv1_0_0.get_modules",
+                values=dict(
+                    _external=True
+                )
+            ),
+        }
+    )
     type = ma.Nested(ModulesTypesSchema(exclude=("modules",)))
