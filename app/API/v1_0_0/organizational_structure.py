@@ -503,20 +503,29 @@ def delete_organizational_structure_element(id):
         # If recursive is True, delete element with his child nodes, else move
         # child nodes to parent of deleted element
         elif recursive.value:
-            db.session.delete(node_to_delete)
-
             if len(node_to_delete.children):
                 given_message = _(
                     "Element «%(name)s» successfully deleted from"
                     " database with all children elements",
                     name=node_to_delete.name
                 )
+                for child in node_to_delete.children:
+                    if not child.deletable:
+                        child.move_inside(node_to_delete.parent_id)
+                        db.session.commit()
+                        given_message = _(
+                            "Element «%(name)s» successfully deleted from"
+                            " database with all children elements."
+                            " Non deletable childs moved to top level.",
+                            name=node_to_delete.name
+                        )
             else:
                 given_message = _(
                     "Element «%(name)s» successfully deleted from"
                     " database",
                     name=node_to_delete.name
                 )
+            db.session.delete(node_to_delete)
         else:
             if len(node_to_delete.children):
                 # Moving child to parent of root element
