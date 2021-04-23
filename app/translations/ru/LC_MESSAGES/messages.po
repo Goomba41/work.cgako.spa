@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-04-22 11:18+0300\n"
+"POT-Creation-Date: 2021-04-23 15:38+0300\n"
 "PO-Revision-Date: 2021-04-15 15:53+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -31,7 +31,7 @@ msgstr "Модуль для обновления с id=%(id)s не сущест�
 
 #: app/API/v1_0_0/modules.py:300 app/API/v1_0_0/modules.py:337
 #: app/API/v1_0_0/modules.py:374 app/API/v1_0_0/organizational_structure.py:262
-#: app/API/v1_0_0/organizational_structure.py:805
+#: app/API/v1_0_0/organizational_structure.py:814
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&name=%(value)s» is not type of "
@@ -51,8 +51,8 @@ msgstr ""
 #, python-format
 msgid "Value «%(value)s» from parameter «&version=%(value)s» is out of range 1-9"
 msgstr ""
-"Значение «%(value)s» параметра «&version=%(value)s» должно быть в пределах "
-"1-9 символов"
+"Значение «%(value)s» параметра «&version=%(value)s» должно быть в "
+"пределах 1-9 символов"
 
 #: app/API/v1_0_0/modules.py:404
 #, python-format
@@ -63,13 +63,13 @@ msgstr ""
 "Значение «%(value)s» параметра «&version=%(value)s» вне формата "
 "<major>.<minor>.<patch> (2-х символьные числа)"
 
-#: app/API/v1_0_0/modules.py:427 app/API/v1_0_0/organizational_structure.py:909
+#: app/API/v1_0_0/modules.py:427 app/API/v1_0_0/organizational_structure.py:918
 #, python-format
 msgid "Successfully updated element «%(name)s»"
 msgstr "Успешно обновлен элемент «%(name)s»"
 
 #: app/API/v1_0_0/modules.py:432 app/API/v1_0_0/organizational_structure.py:414
-#: app/API/v1_0_0/organizational_structure.py:914 app/API/v1_0_0/utils.py:80
+#: app/API/v1_0_0/organizational_structure.py:923 app/API/v1_0_0/utils.py:80
 msgid "Success"
 msgstr "Успех"
 
@@ -84,7 +84,7 @@ msgstr ""
 "отправлены данные 2. отправленные данные совпадают с имеющимися 3. "
 "обновление информации об элементе запрещено"
 
-#: app/API/v1_0_0/modules.py:450 app/API/v1_0_0/organizational_structure.py:932
+#: app/API/v1_0_0/modules.py:450 app/API/v1_0_0/organizational_structure.py:941
 #: app/API/v1_0_0/utils.py:89
 msgid "Info"
 msgstr "Информация"
@@ -96,7 +96,7 @@ msgstr "Элемент с id=%(id)s не существует в базе дан
 
 #: app/API/v1_0_0/organizational_structure.py:195
 #: app/API/v1_0_0/organizational_structure.py:220
-#: app/API/v1_0_0/organizational_structure.py:765
+#: app/API/v1_0_0/organizational_structure.py:774
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&type=%(value)s» is not type of "
@@ -106,7 +106,7 @@ msgstr ""
 "«%(type)s»"
 
 #: app/API/v1_0_0/organizational_structure.py:206
-#: app/API/v1_0_0/organizational_structure.py:776
+#: app/API/v1_0_0/organizational_structure.py:785
 #, python-format
 msgid "The type submitted in parameter «&type=%(value)s» is does not exist"
 msgstr "Тип, отправленный в параметре «&type=%(value)s» не существует в системе"
@@ -130,7 +130,7 @@ msgstr ""
 "запрещена"
 
 #: app/API/v1_0_0/organizational_structure.py:280
-#: app/API/v1_0_0/organizational_structure.py:823
+#: app/API/v1_0_0/organizational_structure.py:832
 #, python-format
 msgid "Value «%(value)s» from parameter «&name=%(value)s» is out of range 1-100"
 msgstr ""
@@ -138,7 +138,7 @@ msgstr ""
 "1-100 символов"
 
 #: app/API/v1_0_0/organizational_structure.py:305
-#: app/API/v1_0_0/organizational_structure.py:692
+#: app/API/v1_0_0/organizational_structure.py:701
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&insertable=%(value)s» is not type of "
@@ -148,7 +148,7 @@ msgstr ""
 "«%(type)s»"
 
 #: app/API/v1_0_0/organizational_structure.py:324
-#: app/API/v1_0_0/organizational_structure.py:710
+#: app/API/v1_0_0/organizational_structure.py:719
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&updatable=%(value)s» is not type of "
@@ -158,7 +158,7 @@ msgstr ""
 "«%(type)s»"
 
 #: app/API/v1_0_0/organizational_structure.py:343
-#: app/API/v1_0_0/organizational_structure.py:727
+#: app/API/v1_0_0/organizational_structure.py:736
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&movable=%(value)s» is not type of "
@@ -168,7 +168,7 @@ msgstr ""
 "«%(type)s»"
 
 #: app/API/v1_0_0/organizational_structure.py:362
-#: app/API/v1_0_0/organizational_structure.py:744
+#: app/API/v1_0_0/organizational_structure.py:753
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&deletable=%(value)s» is not type of "
@@ -211,7 +211,7 @@ msgstr ""
 "Значение «%(value)s» параметра «&recursive=%(value)s» не является типом "
 "«%(type)s»"
 
-#: app/API/v1_0_0/organizational_structure.py:509
+#: app/API/v1_0_0/organizational_structure.py:507
 #, python-format
 msgid ""
 "Element «%(name)s» successfully deleted from database with all children "
@@ -220,13 +220,22 @@ msgstr ""
 "Элемент «%(name)s» успешно удален из базы данных вместе со всеми "
 "внутреннимиэлементами"
 
-#: app/API/v1_0_0/organizational_structure.py:515
-#: app/API/v1_0_0/organizational_structure.py:537
+#: app/API/v1_0_0/organizational_structure.py:516
+#, python-format
+msgid ""
+"Element «%(name)s» successfully deleted from database with all children "
+"elements. Non deletable childs moved to top level."
+msgstr ""
+"Элемент «%(name)s» успешно удален из базы данных со всеми внутренними элементами."
+" Не удаляемые внутренние элементы перемещены на уровень выше"
+
+#: app/API/v1_0_0/organizational_structure.py:523
+#: app/API/v1_0_0/organizational_structure.py:546
 #, python-format
 msgid "Element «%(name)s» successfully deleted from database"
 msgstr "Элемент «%(name)s» успешно удален из базы данных"
 
-#: app/API/v1_0_0/organizational_structure.py:530
+#: app/API/v1_0_0/organizational_structure.py:539
 #, python-format
 msgid ""
 "Element «%(name)s» successfully deleted from database. All children "
@@ -235,7 +244,7 @@ msgstr ""
 "Элемент «%(name)s» успешно удален из базы данных. Все внутренние элементы"
 " перемещены на уровень выше"
 
-#: app/API/v1_0_0/organizational_structure.py:577
+#: app/API/v1_0_0/organizational_structure.py:586
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&parent=%(value)s» is not type of "
@@ -244,7 +253,7 @@ msgstr ""
 "Значение «%(value)s» параметра «&parent=%(value)s» не является типом "
 "«%(type)s»"
 
-#: app/API/v1_0_0/organizational_structure.py:594
+#: app/API/v1_0_0/organizational_structure.py:603
 msgid ""
 "The target in one of submitted parameter «&parent», «&before», «&after» "
 "is does not exist"
@@ -252,7 +261,7 @@ msgstr ""
 "Целевой элемент в одном из параметров: «&parent», «&before», «&after» не "
 "существует в базе данных"
 
-#: app/API/v1_0_0/organizational_structure.py:606
+#: app/API/v1_0_0/organizational_structure.py:615
 #, python-format
 msgid ""
 "Unable to move element with id=%(id)s to element with id=%(target_id)s: "
@@ -263,7 +272,7 @@ msgstr ""
 "целевой элемент является должностью (не может иметь внутренних элементов)"
 " или вставка в целевой элемент запрещена"
 
-#: app/API/v1_0_0/organizational_structure.py:632
+#: app/API/v1_0_0/organizational_structure.py:641
 #, python-format
 msgid ""
 "Unable to move element with id=%(id)s before or after element with "
@@ -274,17 +283,17 @@ msgstr ""
 "элемента с id=%(target_id)s: вставка в родителя целевого элемента с "
 "id=%(target_parent_id)s запрещена"
 
-#: app/API/v1_0_0/organizational_structure.py:655
+#: app/API/v1_0_0/organizational_structure.py:664
 #, python-format
 msgid "Element to update with id=%(id)s is not exist in database"
 msgstr "Элемент для обновления с id=%(id)s не существует в базе данных"
 
-#: app/API/v1_0_0/organizational_structure.py:665
+#: app/API/v1_0_0/organizational_structure.py:674
 #, python-format
 msgid "Root element «%(name)s» cannot be updated"
 msgstr "Корневой элемент «%(name)s» не может быть изменен"
 
-#: app/API/v1_0_0/organizational_structure.py:787
+#: app/API/v1_0_0/organizational_structure.py:796
 #, python-format
 msgid ""
 "Cannot change type of element with id=%(id)s to type 2 (department "
@@ -295,14 +304,14 @@ msgstr ""
 "имеет внутренние элементы. Сначала переместите внутренние элементы в "
 "другой элемент."
 
-#: app/API/v1_0_0/organizational_structure.py:853
+#: app/API/v1_0_0/organizational_structure.py:862
 #, python-format
 msgid ""
 "Element «%(name)s» with id=%(id)s is prohibited from moving to another "
 "elements"
 msgstr "Элемент «%(name)s» с id=%(id)s запрещено перемещать под другие элементы"
 
-#: app/API/v1_0_0/organizational_structure.py:866
+#: app/API/v1_0_0/organizational_structure.py:875
 msgid ""
 "Submitted more than one from parameters: parent,after, before. May be "
 "processed only one parameterat time. Please, exclude unnecessary "
@@ -312,11 +321,11 @@ msgstr ""
 "обработать только один параметр за запрос. Пожалуйста, исключите ненужные"
 " параметры из запроса."
 
-#: app/API/v1_0_0/organizational_structure.py:887
+#: app/API/v1_0_0/organizational_structure.py:896
 msgid "Function is bugged, so temporarly does not work"
 msgstr "Функция имеет баги, поэтому временно отключена"
 
-#: app/API/v1_0_0/organizational_structure.py:924
+#: app/API/v1_0_0/organizational_structure.py:933
 #, python-format
 msgid ""
 "Element «%(name)s» is stay unchanged by one of the reasons: 1. you did "
@@ -326,6 +335,92 @@ msgstr ""
 "Элемент «%(name)s» остался неизменным по одной из причин: 1. не "
 "отправлены данные 2. отправленные данные совпадают с имеющимися 3. "
 "обновление информации об элементе запрещено"
+
+#: app/API/v1_0_0/relations.py:31 app/API/v1_0_0/relations.py:102
+#: app/API/v1_0_0/relations.py:180 app/API/v1_0_0/relations.py:270
+#, python-format
+msgid "User with id=%(value)s does not exist in database. Please, choose other."
+msgstr "Пользователь с id=%(value)s не существует в базе данных. Пожалуйста, выберите другого."
+
+#: app/API/v1_0_0/relations.py:41 app/API/v1_0_0/relations.py:112
+#, python-format
+msgid "Module with id=%(value)s does not exist in database. Please, choose other."
+msgstr "Модуль с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+
+#: app/API/v1_0_0/relations.py:59
+#, python-format
+msgid ""
+"User(%(user)s)->Module(%(module)s) relation already exist in database. "
+"Request ignored."
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) уже существует в базе данных. Запрос проигнорирован."
+
+#: app/API/v1_0_0/relations.py:73
+#, python-format
+msgid "User(%(user)s)->Module(%(module)s) relation successfully created!"
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) успешно создано!"
+
+#: app/API/v1_0_0/relations.py:131
+#, python-format
+msgid ""
+"User(%(user)s)->Module(%(module)s) relation does not exist in database. "
+"Request ignored."
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) не существует в базе данных. "
+"Запрос проигнорирован."
+
+#: app/API/v1_0_0/relations.py:145
+#, python-format
+msgid "User(%(user)s)->Module(%(module)s) relation successfully deleted!"
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) успешно удалено!"
+
+#: app/API/v1_0_0/relations.py:190
+#, python-format
+msgid ""
+"Strucure element with id=%(value)s does not exist in database. Please, "
+"choose other."
+msgstr "Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+
+#: app/API/v1_0_0/relations.py:209
+#, python-format
+msgid ""
+"User(%(user)s)->Structure element(%(structure)s) relation already exist "
+"in database. Request ignored."
+msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) уже существует "
+"в базе данных. Запрос проигнорирован."
+
+#: app/API/v1_0_0/relations.py:220
+#, python-format
+msgid ""
+"User(%(user)s)->Structure element(%(structure)s) relation could not be "
+"created. User can only be associated with structure type 2 (department "
+"position)."
+msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не может быть "
+"создано. Пользователь может быть добавлено только в элемент типа 2 (должность "
+"отдела)."
+
+#: app/API/v1_0_0/relations.py:235
+#, python-format
+msgid "User(%(user)s)->Module(%(structure)s) relation successfully created!"
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(structure)s) успешно создано!"
+
+#: app/API/v1_0_0/relations.py:280
+#, python-format
+msgid ""
+"Structure element with id=%(value)s does not exist in database. Please, "
+"choose other."
+msgstr "Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+
+#: app/API/v1_0_0/relations.py:300
+#, python-format
+msgid ""
+"User(%(user)s)->Structure element(%(structure)s) relation does not exist "
+"in database. Request ignored."
+msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не существует "
+"в базе данных. Запрос проигнорирован."
+
+#: app/API/v1_0_0/relations.py:314
+#, python-format
+msgid "User(%(user)s)->Module(%(structure)s) relation successfully deleted!"
+msgstr "Отношение Пользователь(%(user)s)->Модуль(%(structure)s) успешно удалено!"
 
 #: app/API/v1_0_0/utils.py:68
 msgid "Error"
@@ -500,4 +595,4 @@ msgid ""
 "exist in model «%(model)s»"
 msgstr ""
 "Столбец «%(column)s» из параметра исключений «&exclude=%(items)s» не "
-"существует в модели «%(model)s»
+"существует в модели «%(model)s"

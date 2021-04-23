@@ -1,4 +1,4 @@
-"""Views of API version 1.0.0: User profile."""
+"""Views of API version 1.0.0: Organizational structure."""
 
 from flask import Response, json, request, url_for
 from flask_babel import _

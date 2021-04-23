@@ -7,6 +7,44 @@ Flask database models initialization.
 from app import db
 from sqlalchemy_mptt.mixins import BaseNestedSets
 
+# Assignment tables
+
+user_module = db.Table(
+    'assignment_users_modules',
+    db.Column(
+        'user_id',
+        db.Integer,
+        db.ForeignKey('innerInformationSystem_System.users.id'),
+        primary_key=True
+    ),
+    db.Column(
+        'module_id',
+        db.Integer,
+        db.ForeignKey('innerInformationSystem_System.modules.id'),
+        primary_key=True
+    )
+)
+
+user_structure = db.Table(
+    'assignment_users_structures',
+    db.Column(
+        'user_id',
+        db.Integer,
+        db.ForeignKey('innerInformationSystem_System.users.id'),
+        primary_key=True
+    ),
+    db.Column(
+        'structure_id',
+        db.Integer,
+        db.ForeignKey(
+            'organizational_structure.id'
+        ),
+        primary_key=True
+    )
+)
+
+# ------------------------------------------------------------------------------
+
 
 class OrganizationalStructure(db.Model, BaseNestedSets):
     """Organizational structure model."""
@@ -56,6 +94,20 @@ class Users(db.Model):
         default=False,
         nullable=False,
         comment="Статус записи пользователя"
+    )
+
+    modules = db.relationship(
+        'Modules',
+        secondary=user_module,
+        lazy='subquery',
+        backref=db.backref('users', lazy=True)
+    )
+
+    structures = db.relationship(
+        'OrganizationalStructure',
+        secondary=user_structure,
+        lazy='subquery',
+        backref=db.backref('users', lazy=True)
     )
 
     # def __init__(self, login, password,

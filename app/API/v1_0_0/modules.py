@@ -1,4 +1,4 @@
-"""Views of API version 1.0.0: User profile."""
+"""Views of API version 1.0.0: System modules and modules types."""
 
 import re
 
