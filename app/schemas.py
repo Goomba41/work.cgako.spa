@@ -5,19 +5,10 @@ Flask database models initialization.
 """
 
 from app import ma
-from app.models import Roles, OrganizationalStructure, Users, ModulesTypes, \
- Modules
+from app.models import OrganizationalStructure, Users, ModulesTypes, \
+ Modules, Emails
 
 from marshmallow_sqlalchemy import ModelSchema
-
-
-class RolesSchema(ModelSchema):
-    """System role serialization schema."""
-
-    class Meta:
-        """Metadata."""
-
-        model = Roles
 
 
 class UsersBaseSchema(ModelSchema):
@@ -137,3 +128,31 @@ class ModulesSchema(ModulesBaseSchema):
         }
     )
     type = ma.Nested(ModulesTypesSchema(exclude=("modules",)))
+    users = ma.Nested(UsersBaseSchema(exclude=("modules",), many=True))
+
+
+class EmailsSchema(ModulesBaseSchema):
+    """Emails serialization schema."""
+
+    class Meta:
+        """Metadata."""
+
+        model = Emails
+
+    links = ma.Hyperlinks(
+        {
+            "self": ma.URLFor(
+                "APIv1_0_0.get_emails_item",
+                values=dict(
+                    id="<id>", _external=True
+                )
+            ),
+            "collection": ma.URLFor(
+                "APIv1_0_0.get_emails",
+                values=dict(
+                    _external=True
+                )
+            ),
+        }
+    )
+    # type = ma.Nested(UsersBaseSchema(exclude=("emails",)))

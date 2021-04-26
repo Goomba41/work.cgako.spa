@@ -34,7 +34,7 @@ CREATE TABLE `actions` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Имя действия над объектом',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Список действий над объектами';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,8 +45,8 @@ DROP TABLE IF EXISTS `assignment_permissions_roles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assignment_permissions_roles` (
-  `permission_id` int NOT NULL,
-  `role_id` int NOT NULL,
+  `permission_id` int NOT NULL COMMENT 'Разрешение',
+  `role_id` int NOT NULL COMMENT 'Роль',
   PRIMARY KEY (`permission_id`,`role_id`),
   KEY `assignment_permissions_roles_ibfk_2` (`role_id`),
   KEY `assignment_permissions_roles_ibfk_1` (`permission_id`),
@@ -63,31 +63,14 @@ DROP TABLE IF EXISTS `assignment_removed_permissions_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assignment_removed_permissions_users` (
-  `user_assignment_id` int NOT NULL,
-  `permission_id` int NOT NULL,
+  `user_assignment_id` int NOT NULL COMMENT 'Пользователь модуля',
+  `permission_id` int NOT NULL COMMENT 'Разрешение',
   PRIMARY KEY (`user_assignment_id`,`permission_id`),
-  KEY `assignment_removed_permissions_users_ibfk_1` (`permission_id`),
   KEY `assignment_removed_permissions_users_ibfk_2` (`user_assignment_id`) USING BTREE,
-  CONSTRAINT `assignment_removed_permissions_users_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `assignment_removed_permissions_users_ibfk_2` FOREIGN KEY (`user_assignment_id`) REFERENCES `assignment_users_modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `assignment_users_emails`
---
-
-DROP TABLE IF EXISTS `assignment_users_emails`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `assignment_users_emails` (
-  `user_id` int NOT NULL,
-  `email_id` int NOT NULL,
-  KEY `users_emails_assignment_ibfk_1` (`email_id`),
-  KEY `users_emails_assignment_ibfk_2` (`user_id`),
-  CONSTRAINT `assignment_users_emails_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `assignment_users_emails_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `assignment_removed_permissions_users_ibfk_1` (`permission_id`),
+  CONSTRAINT `assignment_removed_permissions_users_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `assignment_removed_permissions_users_ibfk_2` FOREIGN KEY (`user_assignment_id`) REFERENCES `assignment_users_modules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Список удаленных разрешений (запретов) пользователя';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,31 +82,14 @@ DROP TABLE IF EXISTS `assignment_users_modules`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assignment_users_modules` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT ' Уникальный идентификатор',
-  `user_id` int NOT NULL,
-  `module_id` int NOT NULL,
+  `user_id` int NOT NULL COMMENT 'Пользователь',
+  `module_id` int NOT NULL COMMENT 'Модуль',
   PRIMARY KEY (`id`),
   KEY `assignment_users_modules_ibfk_1` (`module_id`),
   KEY `assignment_users_modules_ibfk_2` (`user_id`),
   CONSTRAINT `assignment_users_modules_ibfk_1` FOREIGN KEY (`module_id`) REFERENCES `modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `assignment_users_modules_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `assignment_users_passwords`
---
-
-DROP TABLE IF EXISTS `assignment_users_passwords`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `assignment_users_passwords` (
-  `user_id` int NOT NULL,
-  `password_id` int NOT NULL,
-  KEY `users_passwords_assignment_ibfk_1` (`password_id`),
-  KEY `users_passwords_assignment_ibfk_2` (`user_id`),
-  CONSTRAINT `assignment_users_passwords_ibfk_1` FOREIGN KEY (`password_id`) REFERENCES `passwords` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `assignment_users_passwords_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Связь пользователей и модулей';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,31 +100,14 @@ DROP TABLE IF EXISTS `assignment_users_roles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assignment_users_roles` (
-  `user_assignment_id` int NOT NULL,
-  `role_id` int NOT NULL,
+  `user_assignment_id` int NOT NULL COMMENT 'Пользователь модуля',
+  `role_id` int NOT NULL COMMENT 'Роль',
   PRIMARY KEY (`user_assignment_id`,`role_id`),
-  KEY `assignment_users_roles_ibfk1` (`role_id`),
   KEY `assignment_users_roles_ibfk2` (`user_assignment_id`),
+  KEY `assignment_users_roles_ibfk1` (`role_id`),
   CONSTRAINT `assignment_users_roles_ibfk1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `assignment_users_roles_ibfk2` FOREIGN KEY (`user_assignment_id`) REFERENCES `assignment_users_modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `assignment_users_socials`
---
-
-DROP TABLE IF EXISTS `assignment_users_socials`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `assignment_users_socials` (
-  `user_id` int NOT NULL,
-  `social_id` int NOT NULL,
-  KEY `assignment_users_socials_ibfk_1` (`social_id`),
-  KEY `assignment_users_socials_ibfk_2` (`user_id`),
-  CONSTRAINT `assignment_users_socials_ibfk_1` FOREIGN KEY (`social_id`) REFERENCES `socials` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `assignment_users_socials_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Связь пользователей и ролей';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,13 +118,13 @@ DROP TABLE IF EXISTS `assignment_users_structures`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assignment_users_structures` (
-  `user_id` int NOT NULL,
-  `structure_id` int NOT NULL,
+  `user_id` int NOT NULL COMMENT 'Пользователь',
+  `structure_id` int NOT NULL COMMENT 'Элемент организационной структуры',
   KEY `assignment_users_structures_ibfk_1` (`structure_id`),
   KEY `assignment_users_structures_ibfk_2` (`user_id`),
   CONSTRAINT `assignment_users_structures_ibfk_1` FOREIGN KEY (`structure_id`) REFERENCES `organizational_structure` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `assignment_users_structures_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Связь пользователей и структуры организации';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,14 +135,17 @@ DROP TABLE IF EXISTS `emails`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `emails` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `user_id` int NOT NULL COMMENT 'Пользователь',
   `value` varchar(100) NOT NULL COMMENT 'Адрес почты',
   `type` varchar(20) NOT NULL COMMENT 'Тип почты',
   `verify` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Подтверждение',
   `active_until` datetime NOT NULL COMMENT 'Активна до',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `value` (`value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `value` (`value`),
+  KEY `emails_ibfk_1` (`user_id`),
+  CONSTRAINT `emails_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Электронные почты';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,12 +157,12 @@ DROP TABLE IF EXISTS `history`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `history` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
-  `user_id` int NOT NULL,
-  `action_id` int NOT NULL,
-  `object_id` int NOT NULL,
-  `module_id` int NOT NULL,
-  `action_describe` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `make_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id` int NOT NULL COMMENT 'Пользователь',
+  `action_id` int NOT NULL COMMENT 'Действие',
+  `object_id` int NOT NULL COMMENT 'Объект',
+  `module_id` int NOT NULL COMMENT 'Модуль',
+  `action_describe` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'Описание действия',
+  `make_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Совершено в:',
   PRIMARY KEY (`id`),
   KEY `history_ibfk_1` (`user_id`),
   KEY `history_ibfk_2` (`module_id`),
@@ -220,7 +172,7 @@ CREATE TABLE `history` (
   CONSTRAINT `history_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `modules` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `history_ibfk_3` FOREIGN KEY (`action_id`) REFERENCES `actions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `history_ibfk_4` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='История (логи) действий пользователей в системе';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,7 +192,7 @@ CREATE TABLE `modules` (
   PRIMARY KEY (`id`),
   KEY `modules_ibfk_1` (`module_type_id`),
   CONSTRAINT `modules_ibfk_1` FOREIGN KEY (`module_type_id`) REFERENCES `modules_types` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Модули системы';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -255,7 +207,7 @@ CREATE TABLE `modules_types` (
   `name` varchar(50) NOT NULL COMMENT 'Имя типа модуля',
   `code` varchar(36) DEFAULT NULL COMMENT 'Уникальный код',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Типы модулей системы';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -269,7 +221,7 @@ CREATE TABLE `objects` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
   `name` varchar(50) NOT NULL COMMENT 'Имя объекта взаимодействия',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Объекты системы для взаимодействий';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -293,12 +245,12 @@ CREATE TABLE `organizational_structure` (
   `tree_id` int DEFAULT NULL,
   `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `parent_id` (`parent_id`),
   KEY `organizational_structure_rgt_idx` (`rgt`),
   KEY `organizational_structure_level_idx` (`level`),
   KEY `organizational_structure_lft_idx` (`lft`),
-  CONSTRAINT `organizational_structure_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `organizational_structure` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `organizational_structure_ibfk_1` (`parent_id`),
+  CONSTRAINT `organizational_structure_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `organizational_structure` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Организационная структура организации';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -309,15 +261,18 @@ DROP TABLE IF EXISTS `passwords`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `passwords` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `user_id` int NOT NULL COMMENT 'Пользователь',
   `value` varchar(100) NOT NULL COMMENT 'Захешированный пароль',
   `blocked` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Статус блокировки пароля',
   `first_time_use` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Использован впервые?',
   `numer_of_uses` int NOT NULL DEFAULT '0' COMMENT 'Количество использований',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Создан',
   `active_until` datetime NOT NULL COMMENT 'Активен до',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`),
+  KEY `passwords_ibfk_1` (`user_id`),
+  CONSTRAINT `passwords_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Пароли пользователей';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,15 +283,15 @@ DROP TABLE IF EXISTS `permissions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permissions` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `action_id` int NOT NULL,
-  `object_id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `action_id` int NOT NULL COMMENT 'Действие',
+  `object_id` int NOT NULL COMMENT 'Объект',
   PRIMARY KEY (`id`),
   KEY `permissions_ibfk_1` (`action_id`),
   KEY `permissions_ibfk_2` (`object_id`),
   CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`action_id`) REFERENCES `actions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `permissions_ibfk_2` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Разрешения (связь действия и объекта)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,13 +302,13 @@ DROP TABLE IF EXISTS `roles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `module_type_id` int NOT NULL,
-  `name` varchar(50) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор',
+  `module_type_id` int NOT NULL COMMENT 'Тип модуля',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Наименование роли',
   PRIMARY KEY (`id`),
   KEY `roles_ibfk_1` (`module_type_id`),
   CONSTRAINT `roles_ibfk_1` FOREIGN KEY (`module_type_id`) REFERENCES `modules_types` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Роли системы';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -365,8 +320,11 @@ DROP TABLE IF EXISTS `socials`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `socials` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT ' Уникальный идентификатор',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `user_id` int NOT NULL COMMENT 'Пользователь',
+  PRIMARY KEY (`id`),
+  KEY `socials_ibfk_1` (`user_id`),
+  CONSTRAINT `socials_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Токены авторизации социальных сетей';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -387,12 +345,13 @@ CREATE TABLE `users` (
   `about_me` text COMMENT 'О себе (например, должность)',
   `birth_date` date DEFAULT NULL COMMENT 'Дата рождения',
   `employment_date` date DEFAULT NULL COMMENT 'Дата трудоустройства',
+  `archive_experience_periods` json NOT NULL COMMENT 'Периоды архивной работы для расчета стажа',
   `status` tinyint(1) NOT NULL COMMENT 'Статус записи пользователя',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login` (`login`),
   UNIQUE KEY `phone` (`phone`),
   CONSTRAINT `users_chk_1` CHECK ((`status` in (0,1)))
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Пользователи';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -408,4 +367,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-22 15:33:03
+-- Dump completed on 2021-04-26 13:51:29

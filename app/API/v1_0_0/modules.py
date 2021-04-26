@@ -104,10 +104,53 @@ def get_modules():
 def get_modules_item(id):
     """Get modules item by id."""
     try:
-        print(f"GET MODULE {id}")
-        response = json_http_response(
+        # Get parameters from request
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
+
+        # Forming dumping parameters
+        dump_params = {}
+
+        # Check if values of getted parameters exist in database table
+        # and set dump settings
+        try:
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Modules, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Modules, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
+        except Exception as error:
+            return error.args[0]
+
+        schema = ModulesSchema(**dump_params)
+        # ----------------------------------------------------------------------
+
+        # Query item from database, and if is not none dump it
+        item = Modules.query.get(id)
+        if not item:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Module with id=%(id)s doesn't exist in database",
+                    id=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        data = schema.dump(item)
+        # ----------------------------------------------------------------------
+
+        response = Response(
+            response=json.dumps(data),
             status=200,
-            dbg=request.args.get('dbg', False)
+            mimetype='application/json'
         )
     except Exception:
 

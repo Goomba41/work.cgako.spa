@@ -4,6 +4,8 @@ Database objects.
 Flask database models initialization.
 """
 
+import datetime
+
 from app import db
 from sqlalchemy_mptt.mixins import BaseNestedSets
 
@@ -14,13 +16,13 @@ user_module = db.Table(
     db.Column(
         'user_id',
         db.Integer,
-        db.ForeignKey('innerInformationSystem_System.users.id'),
+        db.ForeignKey('users.id'),
         primary_key=True
     ),
     db.Column(
         'module_id',
         db.Integer,
-        db.ForeignKey('innerInformationSystem_System.modules.id'),
+        db.ForeignKey('modules.id'),
         primary_key=True
     )
 )
@@ -30,7 +32,7 @@ user_structure = db.Table(
     db.Column(
         'user_id',
         db.Integer,
-        db.ForeignKey('innerInformationSystem_System.users.id'),
+        db.ForeignKey('users.id'),
         primary_key=True
     ),
     db.Column(
@@ -50,7 +52,7 @@ class OrganizationalStructure(db.Model, BaseNestedSets):
     """Organizational structure model."""
 
     # __table_args__ = {'schema': 'innerInformationSystem_System'}
-    # Приводит к багу
+
     id = db.Column(
         db.Integer,
         primary_key=True,
@@ -72,7 +74,7 @@ class Users(db.Model):
     """System user model."""
 
     __tablename__ = 'users'
-    __table_args__ = {'schema': 'innerInformationSystem_System'}
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
     id = db.Column(
         db.Integer,
         primary_key=True,
@@ -109,6 +111,8 @@ class Users(db.Model):
         lazy='subquery',
         backref=db.backref('users', lazy=True)
     )
+
+    emails = db.relationship('Emails', backref='users', lazy='dynamic')
 
     # def __init__(self, login, password,
     #              name, surname, patronymic,
@@ -181,7 +185,7 @@ class Modules(db.Model):
     """
 
     __tablename__ = 'modules'
-    __table_args__ = {'schema': 'innerInformationSystem_System'}
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
     id = db.Column(
         db.Integer,
         primary_key=True,
@@ -206,16 +210,37 @@ class Modules(db.Model):
         return 'Module «%r»' % (self.name)
 
 
-class Roles(db.Model):
-    """System roles model."""
+class Emails(db.Model):
+    """Emails for users model."""
 
-    __table_args__ = {'schema': 'innerInformationSystem_System'}
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-
-    # users = db.relationship('Users', backref='roles', lazy='dynamic')
-# permission = db.relationship('Permission', backref='role', lazy='dynamic')
+    __tablename__ = 'emails'
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        comment="Уникальный идентификатор"
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id"
+        ),
+        comment="Пользователь"
+    )
+    value = db.Column(db.String(100), comment="Адрес почты")
+    type = db.Column(db.String(20), comment="Тип почты")
+    verify = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+        comment="Подтверждение"
+    )
+    active_until = db.Column(
+        db.DateTime,
+        default=datetime.datetime.now,
+        comment="Активна до"
+    )
 
     def __repr__(self):
         """Class representation string."""
-        return 'Role «%r»' % (self.name)
+        return 'Email «%r»' % (self.value)
