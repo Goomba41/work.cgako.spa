@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-04-23 15:38+0300\n"
+"POT-Creation-Date: 2021-04-29 15:13+0300\n"
 "PO-Revision-Date: 2021-04-15 15:53+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -17,20 +17,45 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
-#: app/API/v1_0_0/modules.py:242
+#: app/API/v1_0_0/emails.py:143
+#, python-format
+msgid "Email with id=%(id)s doesn't exist in database"
+msgstr "Электронная почта с id=%(id)s не существует в базе данных"
+
+#: app/API/v1_0_0/emails.py:194
+#, python-format
+msgid "Email to delete with id=%(value)s is not exist in database"
+msgstr "Электронная почта для удаления с id=%(value)s не существует в базе данных"
+
+#: app/API/v1_0_0/emails.py:207
+#, python-format
+msgid "Email «%(value)s» successfully deleted from database"
+msgstr "Электронная почта «%(value)s» успешно удалена из базы данных"
+
+#: app/API/v1_0_0/emails.py:250
+#, python-format
+msgid "Recipient email with id=%(value)s is does not exist in database"
+msgstr "Почта-получатель с id=%(value)s не существует в базе данных"
+
+#: app/API/v1_0_0/modules.py:140
+#, python-format
+msgid "Module with id=%(id)s doesn't exist in database"
+msgstr "Тип модуля с id=%(id)s не существует в базе данных"
+
+#: app/API/v1_0_0/modules.py:285
 #, python-format
 msgid "Module type with id=%(id)s doesn't exist in database"
 msgstr "Тип модуля с id=%(id)s не существует в базе данных"
 
-#: app/API/v1_0_0/modules.py:277
+#: app/API/v1_0_0/modules.py:320
 #, python-format
 msgid "Module to update with id=%(id)s is not exist in database"
 msgstr "Модуль для обновления с id=%(id)s не существует в базе данных"
 
-#: app/API/v1_0_0/modules.py:300 app/API/v1_0_0/modules.py:337
-#: app/API/v1_0_0/modules.py:374 app/API/v1_0_0/organizational_structure.py:262
+#: app/API/v1_0_0/modules.py:343 app/API/v1_0_0/modules.py:380
+#: app/API/v1_0_0/modules.py:417 app/API/v1_0_0/organizational_structure.py:262
 #: app/API/v1_0_0/organizational_structure.py:814
 #, python-format
 msgid ""
@@ -40,21 +65,21 @@ msgstr ""
 "Значение «%(value)s» параметра «&name=%(value)s» не является типом "
 "«%(type)s»"
 
-#: app/API/v1_0_0/modules.py:318 app/API/v1_0_0/modules.py:355
+#: app/API/v1_0_0/modules.py:361 app/API/v1_0_0/modules.py:398
 #, python-format
 msgid "Value «%(value)s» from parameter «&name=%(value)s» is out of range 1-50"
 msgstr ""
 "Значение «%(value)s» параметра «&name=%(value)s» должно быть в пределах "
 "1-50 символов"
 
-#: app/API/v1_0_0/modules.py:392
+#: app/API/v1_0_0/modules.py:435
 #, python-format
 msgid "Value «%(value)s» from parameter «&version=%(value)s» is out of range 1-9"
 msgstr ""
 "Значение «%(value)s» параметра «&version=%(value)s» должно быть в "
 "пределах 1-9 символов"
 
-#: app/API/v1_0_0/modules.py:404
+#: app/API/v1_0_0/modules.py:447
 #, python-format
 msgid ""
 "Value «%(value)s» from parameter «&version=%(value)s» is not match to "
@@ -63,17 +88,17 @@ msgstr ""
 "Значение «%(value)s» параметра «&version=%(value)s» вне формата "
 "<major>.<minor>.<patch> (2-х символьные числа)"
 
-#: app/API/v1_0_0/modules.py:427 app/API/v1_0_0/organizational_structure.py:918
+#: app/API/v1_0_0/modules.py:470 app/API/v1_0_0/organizational_structure.py:918
 #, python-format
 msgid "Successfully updated element «%(name)s»"
 msgstr "Успешно обновлен элемент «%(name)s»"
 
-#: app/API/v1_0_0/modules.py:432 app/API/v1_0_0/organizational_structure.py:414
-#: app/API/v1_0_0/organizational_structure.py:923 app/API/v1_0_0/utils.py:80
+#: app/API/v1_0_0/modules.py:475 app/API/v1_0_0/organizational_structure.py:414
+#: app/API/v1_0_0/organizational_structure.py:923 app/API/v1_0_0/utils.py:153
 msgid "Success"
 msgstr "Успех"
 
-#: app/API/v1_0_0/modules.py:442
+#: app/API/v1_0_0/modules.py:485
 #, python-format
 msgid ""
 "Item «%(name)s» is stay unchanged by one of the reasons: 1. you did not "
@@ -84,8 +109,8 @@ msgstr ""
 "отправлены данные 2. отправленные данные совпадают с имеющимися 3. "
 "обновление информации об элементе запрещено"
 
-#: app/API/v1_0_0/modules.py:450 app/API/v1_0_0/organizational_structure.py:941
-#: app/API/v1_0_0/utils.py:89
+#: app/API/v1_0_0/modules.py:493 app/API/v1_0_0/organizational_structure.py:941
+#: app/API/v1_0_0/utils.py:162
 msgid "Info"
 msgstr "Информация"
 
@@ -226,8 +251,8 @@ msgid ""
 "Element «%(name)s» successfully deleted from database with all children "
 "elements. Non deletable childs moved to top level."
 msgstr ""
-"Элемент «%(name)s» успешно удален из базы данных со всеми внутренними элементами."
-" Не удаляемые внутренние элементы перемещены на уровень выше"
+"Элемент «%(name)s» успешно удален из базы данных со всеми внутренними "
+"элементами. Не удаляемые внутренние элементы перемещены на уровень выше"
 
 #: app/API/v1_0_0/organizational_structure.py:523
 #: app/API/v1_0_0/organizational_structure.py:546
@@ -340,19 +365,25 @@ msgstr ""
 #: app/API/v1_0_0/relations.py:180 app/API/v1_0_0/relations.py:270
 #, python-format
 msgid "User with id=%(value)s does not exist in database. Please, choose other."
-msgstr "Пользователь с id=%(value)s не существует в базе данных. Пожалуйста, выберите другого."
+msgstr ""
+"Пользователь с id=%(value)s не существует в базе данных. Пожалуйста, "
+"выберите другого."
 
 #: app/API/v1_0_0/relations.py:41 app/API/v1_0_0/relations.py:112
 #, python-format
 msgid "Module with id=%(value)s does not exist in database. Please, choose other."
-msgstr "Модуль с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+msgstr ""
+"Модуль с id=%(value)s не существует в базе данных. Пожалуйста, выберите "
+"другой."
 
 #: app/API/v1_0_0/relations.py:59
 #, python-format
 msgid ""
 "User(%(user)s)->Module(%(module)s) relation already exist in database. "
 "Request ignored."
-msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) уже существует в базе данных. Запрос проигнорирован."
+msgstr ""
+"Отношение Пользователь(%(user)s)->Модуль(%(module)s) уже существует в "
+"базе данных. Запрос проигнорирован."
 
 #: app/API/v1_0_0/relations.py:73
 #, python-format
@@ -364,8 +395,9 @@ msgstr "Отношение Пользователь(%(user)s)->Модуль(%(mo
 msgid ""
 "User(%(user)s)->Module(%(module)s) relation does not exist in database. "
 "Request ignored."
-msgstr "Отношение Пользователь(%(user)s)->Модуль(%(module)s) не существует в базе данных. "
-"Запрос проигнорирован."
+msgstr ""
+"Отношение Пользователь(%(user)s)->Модуль(%(module)s) не существует в базе"
+" данных. Запрос проигнорирован."
 
 #: app/API/v1_0_0/relations.py:145
 #, python-format
@@ -377,15 +409,18 @@ msgstr "Отношение Пользователь(%(user)s)->Модуль(%(mo
 msgid ""
 "Strucure element with id=%(value)s does not exist in database. Please, "
 "choose other."
-msgstr "Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+msgstr ""
+"Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста,"
+" выберите другой."
 
 #: app/API/v1_0_0/relations.py:209
 #, python-format
 msgid ""
 "User(%(user)s)->Structure element(%(structure)s) relation already exist "
 "in database. Request ignored."
-msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) уже существует "
-"в базе данных. Запрос проигнорирован."
+msgstr ""
+"Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) уже "
+"существует в базе данных. Запрос проигнорирован."
 
 #: app/API/v1_0_0/relations.py:220
 #, python-format
@@ -393,9 +428,10 @@ msgid ""
 "User(%(user)s)->Structure element(%(structure)s) relation could not be "
 "created. User can only be associated with structure type 2 (department "
 "position)."
-msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не может быть "
-"создано. Пользователь может быть добавлено только в элемент типа 2 (должность "
-"отдела)."
+msgstr ""
+"Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не "
+"может быть создано. Пользователь может быть добавлено только в элемент "
+"типа 2 (должность отдела)."
 
 #: app/API/v1_0_0/relations.py:235
 #, python-format
@@ -407,62 +443,121 @@ msgstr "Отношение Пользователь(%(user)s)->Модуль(%(st
 msgid ""
 "Structure element with id=%(value)s does not exist in database. Please, "
 "choose other."
-msgstr "Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста, выберите другой."
+msgstr ""
+"Элемент структуры с id=%(value)s не существует в базе данных. Пожалуйста,"
+" выберите другой."
 
 #: app/API/v1_0_0/relations.py:300
 #, python-format
 msgid ""
 "User(%(user)s)->Structure element(%(structure)s) relation does not exist "
 "in database. Request ignored."
-msgstr "Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не существует "
-"в базе данных. Запрос проигнорирован."
+msgstr ""
+"Отношение Пользователь(%(user)s)->Элемент структуры(%(structure)s) не "
+"существует в базе данных. Запрос проигнорирован."
 
 #: app/API/v1_0_0/relations.py:314
 #, python-format
 msgid "User(%(user)s)->Module(%(structure)s) relation successfully deleted!"
 msgstr "Отношение Пользователь(%(user)s)->Модуль(%(structure)s) успешно удалено!"
 
-#: app/API/v1_0_0/utils.py:68
+#: app/API/v1_0_0/utils.py:37
+#, python-format
+msgid "%(num)s year"
+msgid_plural "%(num)s years"
+msgstr[0] "%(num)s год"
+msgstr[1] "%(num)s года"
+msgstr[2] "%(num)s лет"
+
+#: app/API/v1_0_0/utils.py:38
+#, python-format
+msgid "%(num)s month"
+msgid_plural "%(num)s months"
+msgstr[0] "%(num)s месяц"
+msgstr[1] "%(num)s месяца"
+msgstr[2] "%(num)s месяцев"
+
+#: app/API/v1_0_0/utils.py:39
+#, python-format
+msgid "%(num)s week"
+msgid_plural "%(num)s weeks"
+msgstr[0] "%(num)s неделя"
+msgstr[1] "%(num)s недели"
+msgstr[2] "%(num)s недель"
+
+#: app/API/v1_0_0/utils.py:40
+#, python-format
+msgid "%(num)s day"
+msgid_plural "%(num)s days"
+msgstr[0] "%(num)s день"
+msgstr[1] "%(num)s дня"
+msgstr[2] "%(num)s дней"
+
+#: app/API/v1_0_0/utils.py:41
+#, python-format
+msgid "%(num)s hour"
+msgid_plural "%(num)s hours"
+msgstr[0] "%(num)s час"
+msgstr[1] "%(num)s часа"
+msgstr[2] "%(num)s часов"
+
+#: app/API/v1_0_0/utils.py:42
+#, python-format
+msgid "%(num)s minute"
+msgid_plural "%(num)s minutes"
+msgstr[0] "%(num)s минута"
+msgstr[1] "%(num)s минуты"
+msgstr[2] "%(num)s минут"
+
+#: app/API/v1_0_0/utils.py:43
+#, python-format
+msgid "%(num)s second"
+msgid_plural "%(num)s seconds"
+msgstr[0] "%(num)s секунда"
+msgstr[1] "%(num)s секунды"
+msgstr[2] "%(num)s секунд"
+
+#: app/API/v1_0_0/utils.py:141
 msgid "Error"
 msgstr "Ошибка"
 
-#: app/API/v1_0_0/utils.py:70
+#: app/API/v1_0_0/utils.py:143
 msgid "Bad request!"
 msgstr "Некорректный запрос!"
 
-#: app/API/v1_0_0/utils.py:72
+#: app/API/v1_0_0/utils.py:145
 msgid "Unauthorized!"
 msgstr "Не авторизован!"
 
-#: app/API/v1_0_0/utils.py:74
+#: app/API/v1_0_0/utils.py:147
 msgid "Forbidden"
 msgstr "Запрещено"
 
-#: app/API/v1_0_0/utils.py:76
+#: app/API/v1_0_0/utils.py:149
 msgid "Not found!"
 msgstr "Не найдено"
 
-#: app/API/v1_0_0/utils.py:78
+#: app/API/v1_0_0/utils.py:151
 msgid "Internal server error!"
 msgstr "Внутренняя ошибка сервера"
 
-#: app/API/v1_0_0/utils.py:84
+#: app/API/v1_0_0/utils.py:157
 msgid "Created!"
 msgstr "Создано!"
 
-#: app/API/v1_0_0/utils.py:86
+#: app/API/v1_0_0/utils.py:159
 msgid "Warning"
 msgstr "Предупреждение"
 
-#: app/API/v1_0_0/utils.py:87
+#: app/API/v1_0_0/utils.py:160
 msgid "Not modified!"
 msgstr "Не изменено!"
 
-#: app/API/v1_0_0/utils.py:90
+#: app/API/v1_0_0/utils.py:163
 msgid "I don`t know what to say! Probably thisis test response?"
 msgstr "Незнаю, что ответить! Возможно это тестовый запрос?"
 
-#: app/API/v1_0_0/utils.py:113
+#: app/API/v1_0_0/utils.py:186
 msgid ""
 "Debugging info is turned off, because incorrect type of parameter 'dbg' "
 "(should be boolean)"
@@ -470,7 +565,7 @@ msgstr ""
 "Отладочная информация отключена из-за некорректного параметра 'dbg' "
 "(должен быть типа boolean)"
 
-#: app/API/v1_0_0/utils.py:189
+#: app/API/v1_0_0/utils.py:262
 #, python-format
 msgid ""
 "Parsing error of list of filters «%(filters)s» from parameter "
@@ -479,7 +574,7 @@ msgstr ""
 "Ошибка разбора списка фильтров «%(filters)s» из параметра "
 "«&filter=%(filters)s». Убедитесь, что поля разделены запятой."
 
-#: app/API/v1_0_0/utils.py:208
+#: app/API/v1_0_0/utils.py:281
 #, python-format
 msgid ""
 "Invalid filter «%(filter)s» (should be "
@@ -488,14 +583,14 @@ msgstr ""
 "Некорректный фильтр «%(filter)s» (должен быть вида "
 "«filter=<столбец>:<оператор>:<значение>»)"
 
-#: app/API/v1_0_0/utils.py:219
+#: app/API/v1_0_0/utils.py:292
 #, python-format
 msgid "Invalid filter operator «%(operator)s» (possible variants is: %(variants)s"
 msgstr ""
 "Некорректный оператор «%(operator)s» в фильтре (возможные варианты: "
 "%(variants)s"
 
-#: app/API/v1_0_0/utils.py:234
+#: app/API/v1_0_0/utils.py:307
 #, python-format
 msgid ""
 "Column «%(column)s» from filter «%(filter)s» doesn't exist in model "
@@ -504,7 +599,7 @@ msgstr ""
 "Столбец «%(column)s» из фильтра «%(filter)s» не существует в модели "
 "«%(model)s»"
 
-#: app/API/v1_0_0/utils.py:251
+#: app/API/v1_0_0/utils.py:324
 #, python-format
 msgid ""
 "Error of translating value «%(value)s» to list of values (in case of «in»"
@@ -514,12 +609,12 @@ msgstr ""
 "оператор <значение> должен быть строковым списком значений, разделенных "
 "«,»)"
 
-#: app/API/v1_0_0/utils.py:273
+#: app/API/v1_0_0/utils.py:346
 #, python-format
 msgid "Error of translating filter operator «%(op)s»"
 msgstr "Ошибка трансляции оператора «%(op)s» в фильтре"
 
-#: app/API/v1_0_0/utils.py:297
+#: app/API/v1_0_0/utils.py:370
 #, python-format
 msgid ""
 "Parsing error of list of orderings «%(value)s» from parameter "
@@ -528,7 +623,7 @@ msgstr ""
 "Ошибка разбора списка сортировок «%(value)s» из параметра "
 "«&order_by=%(value)s». Убедитесь, что поля разделены запятой."
 
-#: app/API/v1_0_0/utils.py:314
+#: app/API/v1_0_0/utils.py:387
 #, python-format
 msgid ""
 "Invalid order parameter «%(value)s» (should "
@@ -537,7 +632,7 @@ msgstr ""
 "Некорректный параметр сортировки «%(value)s» (должен быть вида "
 "«order_by=<столбец>:<направление_сортировки>»)"
 
-#: app/API/v1_0_0/utils.py:324
+#: app/API/v1_0_0/utils.py:397
 #, python-format
 msgid ""
 "Invalid order direction «%(direction)s» in order parameter «%(order)s» "
@@ -547,7 +642,7 @@ msgstr ""
 "сортировки «%(order)s» (возможные варианты: «acs» (возр.), «desc» "
 "(убыв.))"
 
-#: app/API/v1_0_0/utils.py:339
+#: app/API/v1_0_0/utils.py:412
 #, python-format
 msgid ""
 "Column «%(column)s» from order parameter «%(order)s» doesn't exist in "
@@ -556,12 +651,12 @@ msgstr ""
 "Стобец «%(column)s» из параметра сортировки «%(order)s» не существует в "
 "модели «%(model)s»"
 
-#: app/API/v1_0_0/utils.py:358
+#: app/API/v1_0_0/utils.py:431
 #, python-format
 msgid "Error of translating order by operator «%(operator)s»"
 msgstr "Ошибка трансляции оператора сортировки «%(operator)s»"
 
-#: app/API/v1_0_0/utils.py:385
+#: app/API/v1_0_0/utils.py:458
 #, python-format
 msgid ""
 "Parsing error of list of columns «%(only)s» from parameter "
@@ -570,7 +665,7 @@ msgstr ""
 "Ошибка разбора списка столбцов «%(only)s» из параметра "
 "«&columns=%(only)s». Убедитесь, что поля разделены запятой."
 
-#: app/API/v1_0_0/utils.py:400
+#: app/API/v1_0_0/utils.py:473
 #, python-format
 msgid ""
 "Column «%(items)s» from column parameter «&column=%(columns)s» doesn't "
@@ -579,7 +674,7 @@ msgstr ""
 "Столбец «%(items)s» из параметра столбцов «&column=%(columns)s» не "
 "существует в модели «%(model)s»"
 
-#: app/API/v1_0_0/utils.py:434
+#: app/API/v1_0_0/utils.py:507
 #, python-format
 msgid ""
 "Parsing error of list of exclusions «%(items)s» from parameter "
@@ -588,7 +683,7 @@ msgstr ""
 "Ошибка разбора списка исключений «%(items)s» из параметра "
 "«&exclude=%(items)s». Убедитесь, что поля разделены запятой."
 
-#: app/API/v1_0_0/utils.py:449
+#: app/API/v1_0_0/utils.py:522
 #, python-format
 msgid ""
 "Column «%(column)s» from exclude parameter «&exclude=%(items)s» doesn't "
@@ -596,3 +691,9 @@ msgid ""
 msgstr ""
 "Столбец «%(column)s» из параметра исключений «&exclude=%(items)s» не "
 "существует в модели «%(model)s"
+
+#~ msgid "%(count)d %(unit)s"
+#~ msgid_plural "%(count)d %(unit2)s"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgstr[2] ""

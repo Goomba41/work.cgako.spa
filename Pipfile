@@ -17,6 +17,7 @@ marshmallow-sqlalchemy = "*"
 sqlalchemy-mptt = "*"
 nodeenv = "*"
 flask-babel = "*"
+itsdangerous = "*"
 
 [dev-packages]
 

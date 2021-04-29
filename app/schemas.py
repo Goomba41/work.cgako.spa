@@ -131,7 +131,7 @@ class ModulesSchema(ModulesBaseSchema):
     users = ma.Nested(UsersBaseSchema(exclude=("modules",), many=True))
 
 
-class EmailsSchema(ModulesBaseSchema):
+class EmailsSchema(ModelSchema):
     """Emails serialization schema."""
 
     class Meta:
@@ -155,4 +155,4 @@ class EmailsSchema(ModulesBaseSchema):
             ),
         }
     )
-    # type = ma.Nested(UsersBaseSchema(exclude=("emails",)))
+    users = ma.Nested(UsersBaseSchema(exclude=("emails",)))

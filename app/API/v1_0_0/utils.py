@@ -2,7 +2,8 @@
 
 from random import SystemRandom
 from flask import Response, json, request, current_app as app
-from flask_babel import _
+from flask_babel import _, ngettext
+from itsdangerous import TimedJSONWebSignatureSerializer
 from distutils.util import strtobool
 from urllib.parse import urljoin
 from sqlalchemy.inspection import inspect
@@ -12,6 +13,90 @@ from collections import namedtuple
 import math
 import traceback
 import sys
+
+
+def display_time(seconds, granularity=2):
+    """Time convert to other units."""
+    results = []
+    if granularity <= 0:
+        granularity = 1
+
+    intervals = (
+        1*60*60*24*7*4*12,
+        1*60*60*24*7*4,
+        1*60*60*24*7,
+        1*60*60*24,
+        1*60*60,
+        1*60,
+        1,
+    )
+
+    for count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+        results.append(value)
+
+    intervals = []
+    if results[0]:
+        intervals.append(
+            ngettext(u'%(num)s year', u'%(num)s years', results[0])
+        ),
+    if results[1]:
+        intervals.append(
+            ngettext(u'%(num)s month', u'%(num)s months', results[1])
+        ),
+    if results[2]:
+        intervals.append(
+            ngettext(u'%(num)s week', u'%(num)s weeks', results[2])
+        ),
+    if results[3]:
+        intervals.append(
+            ngettext(u'%(num)s day', u'%(num)s days', results[3])
+        ),
+    if results[4]:
+        intervals.append(
+            ngettext(u'%(num)s hour', u'%(num)s hours', results[4])
+        ),
+    if results[5]:
+        intervals.append(
+            ngettext(u'%(num)s minute', u'%(num)s minutes', results[5])
+        ),
+    if results[6]:
+        intervals.append(
+            ngettext(u'%(num)s second', u'%(num)s seconds', results[6])
+        ),
+
+    return intervals[:granularity]
+
+
+def generate_confirmation_token(value, expiration=3600):
+    """Email confirmation token generation."""
+    serializer = TimedJSONWebSignatureSerializer(
+        app.config['EMAIL_SECRET_KEY'],
+        expires_in=expiration
+    )
+
+    return serializer.dumps(
+        value,
+        salt=app.config['EMAIL_VERIFICATION_SALT']
+    )
+
+
+def confirm_email_token(token):
+    """Email confirmation token verification."""
+    serializer = TimedJSONWebSignatureSerializer(
+        app.config['EMAIL_SECRET_KEY'])
+
+    try:
+        id = serializer.loads(
+            token,
+            salt=app.config['EMAIL_VERIFICATION_SALT'],
+        )
+    except Exception:
+        return (False, None)
+
+    return (True, id)
 
 
 def password_generator(size=8):
