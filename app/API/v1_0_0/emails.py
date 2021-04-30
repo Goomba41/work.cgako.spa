@@ -5,14 +5,15 @@ from flask import request, Response, json, url_for, render_template, \
 from flask_babel import _
 from flask_mail import Message
 from app import db, mail
+from datetime import datetime, timedelta
 
 from .blueprint import APIv1_0_0
 from app.models import Emails
 from app.schemas import EmailsSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
      marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
-     sqlalchemy_orders_converter, pagination_of_list, variable_type_check, \
-     generate_confirmation_token, confirm_email_token, display_time
+     sqlalchemy_orders_converter, pagination_of_list, display_time, \
+     generate_confirmation_token, confirm_email_token  # , variable_type_check
 
 
 @APIv1_0_0.route('/emails/', methods=['GET'])
@@ -242,8 +243,9 @@ def post_emails_verify_item(id):
             Emails.id == id
         ).first()
 
-        print(app.config['USER_MAIL_RENEW'])
-        print(app.config['USER_MAIL_RENEW_NOTIFICATION'])
+        begin_verification_period = recipient.active_until-timedelta(
+            days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+        )
 
         if recipient is None:
             return json_http_response(
@@ -255,7 +257,7 @@ def post_emails_verify_item(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
-        elif recipient.verify:
+        elif recipient.verify and datetime.now() < begin_verification_period:
             return json_http_response(
                 status=400,
                 given_message=_(
@@ -269,15 +271,16 @@ def post_emails_verify_item(id):
         expiration = 3600
 
         token = generate_confirmation_token(id, expiration)
-        confirm_url = 'http://192.168.0.89:8080/verify/mail/'
-        confirm_url += token.decode("utf-8")
+        confirm_url = app.config['CLIENT_LINK'] + '/email/verify/' + \
+            token.decode("utf-8")
 
         html = render_template(
             'confirmation_mail.html',
             confirm_url=confirm_url,
             active_time="".join(display_time(expiration))
         )
-        subject = 'Подтверждение адреса электронной почты в CMS сайта ЦГАКО'
+        subject = 'Подтверждение адреса электронной почты в ИС'
+        ' подразделения ГАСПИ'
 
         message = Message(
             subject,
@@ -286,16 +289,23 @@ def post_emails_verify_item(id):
             sender=app.config['MAIL_DEFAULT_SENDER']
         )
 
-        # mail.send(message)
-
-        # print(confirm_email_token(token))
-        response = json_http_response(
-            given_message=_(
-                "Mail successfully send to recipient for verification"
-            ),
-            status=200,
-            dbg=request.args.get('dbg', False)
-        )
+        try:
+            mail.send(message)
+            response = json_http_response(
+                given_message=_(
+                    "Mail successfully send to recipient for verification"
+                ),
+                status=200,
+                dbg=request.args.get('dbg', False)
+            )
+        except Exception:
+            response = json_http_response(
+                given_message=_(
+                    "Something went wrong! Mail prepared, but not sent!"
+                ),
+                status=400,
+                dbg=request.args.get('dbg', False)
+            )
     except Exception:
 
         response = json_http_response(dbg=request.args.get('dbg', False))
@@ -309,6 +319,7 @@ def put_emails_verify_item(vstring):
     """Update emails item verification from mail."""
     try:
         print("UPDATE EMAIL VERIFICATION")
+        print(confirm_email_token(vstring))
         response = json_http_response(
             status=200,
             dbg=request.args.get('dbg', False)

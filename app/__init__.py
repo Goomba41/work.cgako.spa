@@ -5,6 +5,7 @@ Flask application initialization, blueprints declaration,
 libraries instances creation.
 """
 
+import os
 from flask import Flask, request
 from flask_bcrypt import Bcrypt
 from flask_babel import Babel
@@ -14,7 +15,12 @@ from flask_mail import Mail
 from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
-app.config.from_object('config')
+
+if os.environ['PRODUCTION'] == 'TRUE':
+    app.config.from_object('config.ProductionConfig')
+else:
+    print('WARNING! THIS IS DEVELOPMENT MODE!')
+    app.config.from_object('config.DevelopmentConfig')
 
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 db = SQLAlchemy(app)
