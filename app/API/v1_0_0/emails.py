@@ -243,9 +243,10 @@ def post_emails_verify_item(id):
             Emails.id == id
         ).first()
 
-        begin_verification_period = recipient.active_until-timedelta(
-            days=app.config['USER_MAIL_RENEW_NOTIFICATION']
-        )
+        if recipient:
+            begin_verification_period = recipient.active_until-timedelta(
+                days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+            )
 
         if recipient is None:
             return json_http_response(
@@ -318,9 +319,66 @@ def post_emails_verify_item(id):
 def put_emails_verify_item(vstring):
     """Update emails item verification from mail."""
     try:
-        print("UPDATE EMAIL VERIFICATION")
-        print(confirm_email_token(vstring))
+
+        verification = confirm_email_token(vstring)
+
+        if not verification.result:
+            return json_http_response(
+                given_message=_(
+                    "Token damaged or expired. Email verification"
+                    " is impossible."
+                ),
+                status=400,
+                dbg=request.args.get('dbg', False)
+            )
+
+        email = Emails.query.filter(
+            Emails.id == verification.id
+        ).first()
+
+        if email:
+            begin_verification_period = email.active_until-timedelta(
+                days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+            )
+
+        if email is None:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Email with id=%(value)s"
+                    " is does not exist in database",
+                    value=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        elif email.verify and datetime.now() < begin_verification_period:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Email with id=%(value)s"
+                    " already verified. Request ignored",
+                    value=email.id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        email.verify = True
+        email.active_until = datetime.now() + timedelta(
+            days=app.config['USER_MAIL_RENEW']
+        )
+
+        new_verification_period = email.active_until-timedelta(
+            days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+        )
+
+        db.session.commit()
+
         response = json_http_response(
+            given_message=_(
+                "Email successfully verified! Next verification period begins"
+                " from %(period)s",
+                period=new_verification_period.strftime("%m-%d %H:%M:%S")
+            ),
             status=200,
             dbg=request.args.get('dbg', False)
         )

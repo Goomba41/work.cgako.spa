@@ -88,15 +88,20 @@ def confirm_email_token(token):
     serializer = TimedJSONWebSignatureSerializer(
         app.config['EMAIL_SECRET_KEY'])
 
+    emailVerify = namedtuple(
+        typename="emailVerify",
+        field_names=["result", "id"]
+    )
+
     try:
         id = serializer.loads(
             token,
             salt=app.config['EMAIL_VERIFICATION_SALT'],
         )
     except Exception:
-        return (False, None)
+        return emailVerify(False, None)
 
-    return (True, id)
+    return emailVerify(True, id)
 
 
 def password_generator(size=8):
