@@ -238,6 +238,7 @@ class Emails(db.Model):
     active_until = db.Column(
         db.DateTime,
         default=datetime.datetime.now,
+        nullable=True,
         comment="Активна до"
     )
 

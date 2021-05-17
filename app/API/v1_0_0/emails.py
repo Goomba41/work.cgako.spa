@@ -4,6 +4,7 @@ from flask import request, Response, json, url_for, render_template, \
     current_app as app
 from flask_babel import _
 from flask_mail import Message
+from validate_email import validate_email
 from app import db, mail
 from datetime import datetime, timedelta
 
@@ -13,7 +14,7 @@ from app.schemas import EmailsSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
      marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
      sqlalchemy_orders_converter, pagination_of_list, display_time, \
-     generate_confirmation_token, confirm_email_token  # , variable_type_check
+     generate_confirmation_token, confirm_email_token, variable_type_check
 
 
 @APIv1_0_0.route('/emails/', methods=['GET'])
@@ -222,9 +223,133 @@ def delete_emails_item(id):
 def put_emails_item(id):
     """Update emails item by id."""
     try:
-        print(f"UPDATE EMAIL {id}")
+
+        message_addition = ''
+
+        # Get update target email
+        target = Emails.query.filter(
+            Emails.id == id
+        ).first()
+
+        if target is None:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Email to update with id=%(id)s is not exist"
+                    " in database",
+                    id=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        else:
+            target_ov = target.value
+
+        # Get parameters from request
+        value = request.args.get('value')
+        type = request.args.get('type')
+
+        # Check email value (should be a email formated string in 1-100 range)
+        if value:
+            value = variable_type_check(value.strip(), str)
+            if not value.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is not type of «%(type)s»",
+                        value=value.value,
+                        type=value.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(value.value) > 100:
+                answer_string = str(
+                    value.value[:5]
+                )+"..."+str(
+                    value.value[-5:]
+                ) if len(
+                    value.value
+                ) > 10 else value.value
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is out of range 1-100",
+                        value=answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif (len(value.value) > 0) and (
+                    value.value != target.value
+            ):
+                if not validate_email(value.value):
+                    return json_http_response(
+                        status=400,
+                        given_message=_(
+                            "Something's wrong with email «%(value)s»"
+                            " validation: email incorrect or does not exist",
+                            value=value.value
+                        ),
+                        dbg=request.args.get('dbg', False)
+                    )
+                else:
+                    target.value = value.value
+                    target.verify = 0
+                    target.active_until = None
+
+                    message_addition = _(
+                        " Check updated email for"
+                        " confirmation mail!"
+                    )
+        # ----------------------------------------------------------------------
+
+        # Check email type (should be a string in 1-20 range)
+        if type:
+            type = variable_type_check(type.strip(), str)
+            if not type.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&type=%(value)s» is not type of «%(type)s»",
+                        value=type.value,
+                        type=type.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(type.value) > 20:
+                answer_string = str(
+                    type.value[:5]
+                )+"..."+str(
+                    type.value[-5:]
+                ) if len(
+                    type.value
+                ) > 10 else type.value
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&type=%(value)s» is out of range 1-20",
+                        value=answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif (len(type.value) > 0) and (
+                    type.value != target.type
+            ):
+                target.type = type.value
+        # ----------------------------------------------------------------------
+
+        db.session.commit()
+
+        post_emails_verify_item(id)
+
         response = json_http_response(
             status=200,
+            given_message=_(
+                "Email «%(value)s» has been updated!",
+                value=target_ov
+            )+message_addition,
             dbg=request.args.get('dbg', False)
         )
     except Exception:
@@ -244,9 +369,14 @@ def post_emails_verify_item(id):
         ).first()
 
         if recipient:
-            begin_verification_period = recipient.active_until-timedelta(
-                days=app.config['USER_MAIL_RENEW_NOTIFICATION']
-            )
+            if recipient.active_until:
+                begin_verification_period = recipient.active_until-timedelta(
+                    days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+                )
+            else:
+                begin_verification_period = datetime.now()+timedelta(
+                    hours=1
+                )
 
         if recipient is None:
             return json_http_response(
@@ -337,9 +467,14 @@ def put_emails_verify_item(vstring):
         ).first()
 
         if email:
-            begin_verification_period = email.active_until-timedelta(
-                days=app.config['USER_MAIL_RENEW_NOTIFICATION']
-            )
+            if email.active_until:
+                begin_verification_period = email.active_until-timedelta(
+                    days=app.config['USER_MAIL_RENEW_NOTIFICATION']
+                )
+            else:
+                begin_verification_period = datetime.now()+timedelta(
+                    hours=1
+                )
 
         if email is None:
             return json_http_response(

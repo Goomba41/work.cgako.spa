@@ -18,6 +18,7 @@ sqlalchemy-mptt = "*"
 nodeenv = "*"
 flask-babel = "*"
 itsdangerous = "*"
+py3-validate-email = "*"
 
 [dev-packages]
 
