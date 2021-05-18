@@ -9,7 +9,7 @@ from app import db, mail
 from datetime import datetime, timedelta
 
 from .blueprint import APIv1_0_0
-from app.models import Emails
+from app.models import Emails, Users
 from app.schemas import EmailsSchema
 from .utils import json_http_response, marshmallow_excluding_converter, \
      marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
@@ -167,11 +167,180 @@ def get_emails_item(id):
 def post_emails_item():
     """Post emails item by id."""
     try:
-        print("POST EMAIL")
-        response = json_http_response(
-            status=200,
-            dbg=request.args.get('dbg', False)
+        # Get parameters from request
+        value = request.args.get('value', None)
+        type = request.args.get('type', None)
+        user = request.args.get('user', None)
+
+        # Check user (should be an integer number existed in database)
+        if user:
+            user = variable_type_check(user, int)
+            if not user.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&user=%(value)s» is not type of «%(type)s»",
+                        value=user.value,
+                        type=user.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            user_obj = Users.query.get(user.value)
+            if not user_obj:
+                return json_http_response(
+                    status=404,
+                    given_message=_(
+                        "Add email to user with id=%(id)s is impossible:"
+                        " user is does not exist in database",
+                        id=user.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+        else:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "You don't provide user in parameter"
+                    " «&user=», so adding email has been terminated"
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        # Check email value (should be a email formated string in 1-100 range
+        # unique in entire database)
+        if value:
+            value = variable_type_check(value.strip(), str)
+            if not value.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is not type of «%(type)s»",
+                        value=value.value,
+                        type=value.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(value.value) > 100:
+                answer_string = str(
+                    value.value[:5]
+                )+"..."+str(
+                    value.value[-5:]
+                ) if len(
+                    value.value
+                ) > 10 else value.value
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is out of range 1-100",
+                        value=answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if not validate_email(value.value):
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Something's wrong with email «%(value)s»"
+                        " validation: email incorrect or does not exist",
+                        value=value.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if Emails.query.filter(Emails.value == value.value).first():
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Email «%(value)s» already exist in database: email"
+                        " must be unique in entire database",
+                        value=value.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+        else:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "You don't provide email value in parameter"
+                    " «&value=», so adding email has been terminated"
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        # Check email type (should be a string in 1-20 range)
+        if type:
+            type = variable_type_check(type.strip(), str)
+            if not type.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&type=%(value)s» is not type of «%(type)s»",
+                        value=type.value,
+                        type=type.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(type.value) > 20:
+                answer_string = str(
+                    type.value[:5]
+                )+"..."+str(
+                    type.value[-5:]
+                ) if len(
+                    type.value
+                ) > 10 else type.value
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&type=%(value)s» is out of range 1-20",
+                        value=answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+
+        email = Emails(
+            user_id=user.value,
+            type=type.value,
+            value=value.value,
+            verify=0,
+            active_until=None,
         )
+        db.session.add(email)
+        db.session.flush()
+
+        # Before send response, dump newly added email to json and add
+        # his data to response
+        email_schema = EmailsSchema(
+            only=["id", "value", "links", "type"]
+        )
+        email_dump = email_schema.dump(email)
+        db.session.commit()
+
+        output_json = {
+            "message": _(
+                "Successfully added email «%(email)s»"
+                " to user «%(user)s»! Please, check email box for verification"
+                " mail.",
+                email=value.value,
+                user=user_obj.login
+            ),
+            "email": email_dump,
+            "responseType": _("Success"),
+            "status": 200
+        }
+        # ----------------------------------------------------------------------
+
+        response = Response(
+            response=json.dumps(output_json),
+            status=200,
+            mimetype='application/json'
+        )
+
+        post_emails_verify_item(email.id)
+
     except Exception:
 
         response = json_http_response(dbg=request.args.get('dbg', False))
