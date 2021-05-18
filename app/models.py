@@ -228,7 +228,13 @@ class Emails(db.Model):
         comment="Пользователь"
     )
     value = db.Column(db.String(100), comment="Адрес почты")
-    type = db.Column(db.String(20), comment="Тип почты")
+    type = db.Column(db.String(20), comment="Тип почты", nullable=True)
+    main = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+        comment="Основная"
+    )
     verify = db.Column(
         db.Boolean,
         default=False,

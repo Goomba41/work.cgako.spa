@@ -303,7 +303,7 @@ def post_emails_item():
 
         email = Emails(
             user_id=user.value,
-            type=type.value,
+            type=type.value if type else None,
             value=value.value,
             verify=0,
             active_until=None,
@@ -412,10 +412,12 @@ def put_emails_item(id):
             )
         else:
             target_ov = target.value
+            main_ov = target.main
 
         # Get parameters from request
         value = request.args.get('value')
         type = request.args.get('type')
+        main = request.args.get('main', None)
 
         # Check email value (should be a email formated string in 1-100 range)
         if value:
@@ -465,11 +467,6 @@ def put_emails_item(id):
                     target.value = value.value
                     target.verify = 0
                     target.active_until = None
-
-                    message_addition = _(
-                        " Check updated email for"
-                        " confirmation mail!"
-                    )
         # ----------------------------------------------------------------------
 
         # Check email type (should be a string in 1-20 range)
@@ -509,9 +506,40 @@ def put_emails_item(id):
                 target.type = type.value
         # ----------------------------------------------------------------------
 
+        # Check state "main" (boolean)
+        if main:
+            main = variable_type_check(main, bool)
+            if not main.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter «&main=%(value)s»"
+                        " is not type of «%(type)s»",
+                        value=main.value,
+                        type=main.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif main.value != main_ov:
+                if main.value:
+                    filter = {'user_id': target.user_id, 'main': True}
+                    user_main_email = Emails.query.filter_by(**filter).first()
+                    if user_main_email:
+                        user_main_email.main = False
+                target.main = main.value
+                target.verify = 0
+                target.active_until = None
+
         db.session.commit()
 
-        post_emails_verify_item(id)
+        if target.value != target_ov or (
+            main and main.value != main_ov and main.value
+        ):
+            post_emails_verify_item(id)
+            message_addition = _(
+                " Check updated email for"
+                " confirmation mail!"
+            )
 
         response = json_http_response(
             status=200,
