@@ -1,18 +1,19 @@
 """Views of API version 1.0.0: Routes for tables relations."""
 
-# from flask import Response, json, request
-from flask import request
+from flask import Response, json, request, url_for
 from flask_babel import _
 
 from .blueprint import APIv1_0_0
 
 from app import db
 from app.models import Users, OrganizationalStructure, Modules, user_module, \
-    user_structure
-# from app.schemas import UsersBaseSchema, OrganizationalStructureSchema, \
+    user_structure, Emails
+from app.schemas import EmailsSchema  # , OrganizationalStructureSchema, \
 #     ModulesBaseSchema
 
-from .utils import json_http_response
+from .utils import json_http_response, pagination_of_list, \
+    marshmallow_excluding_converter, marshmallow_only_fields_converter, \
+    sqlalchemy_filters_converter, sqlalchemy_orders_converter
 
 
 @APIv1_0_0.route('/modules/<int:mid>/users/<int:uid>', methods=['POST'])
@@ -318,6 +319,112 @@ def delete_user_structure_relation(uid, sid):
                 structure=structure.name,
             ),
             dbg=request.args.get('dbg', False)
+        )
+
+    except Exception:
+
+        response = json_http_response(dbg=request.args.get('dbg', False))
+
+    return response
+
+
+@APIv1_0_0.route('/users/<int:uid>/emails', methods=['GET'])
+# @token_required
+def get_user_emails_relation(uid):
+    """Get user-emails relation."""
+    try:
+        # Get parameters from request
+        filters_list = request.args.get('filters')
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
+        orders_list = request.args.get('order_by')
+        # ----------------------------------------------------------------------
+
+        # Forming dumping parameters
+        dump_params = {'many': True}
+
+        # Check if values of getted parameters exist in database table
+        # and set dump settings
+        try:
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Emails, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Emails, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
+        except Exception as error:
+            return error.args[0]
+        #
+        schema = EmailsSchema(**dump_params)
+        # ----------------------------------------------------------------------
+
+        user = Users.query.get(uid)
+
+        if not user:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "User with id=%(value)s"
+                    " does not exist in database. Please, choose other.",
+                    value=uid
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        # Make empty base query and if
+        # filters and orders exist - add it to query
+        emails = user.emails
+
+        if filters_list:
+            filters_list = ', '.join(
+                [
+                    x.strip() for x in filters_list.split(",")
+                    if "user_id" not in x
+                ]
+            )
+            filters_list += f", user_id:==:{uid}"
+            try:
+                filters_list = sqlalchemy_filters_converter(
+                    Emails,
+                    filters_list
+                )
+            except Exception as error:
+                return error.args[0]
+            emails = emails.filter(*filters_list)
+        if orders_list:
+            try:
+                orders_list = sqlalchemy_orders_converter(
+                    Emails, orders_list
+                )
+            except Exception as error:
+                return error.args[0]
+            emails = emails.order_by(*orders_list)
+        # ----------------------------------------------------------------------
+
+        emails_dump = schema.dump(emails)
+
+        # Paginating results of dumping
+        # Probably would best is pagination in sqlalchemy query?
+        emails_dump = pagination_of_list(
+            emails_dump,
+            url_for(
+                '.get_modules',
+                _external=True
+            ),
+            query_params=request.args
+        )
+        # ----------------------------------------------------------------------
+
+        response = Response(
+            response=json.dumps(emails_dump),
+            status=200,
+            mimetype='application/json'
         )
 
     except Exception:

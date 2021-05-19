@@ -171,8 +171,9 @@ def post_emails_item():
         value = request.args.get('value', None)
         type = request.args.get('type', None)
         user = request.args.get('user', None)
+        main = request.args.get('main', None)
 
-        # Check user (should be an integer number existed in database)
+        # Check and set user (should be an integer number existed in database)
         if user:
             user = variable_type_check(user, int)
             if not user.result:
@@ -207,8 +208,8 @@ def post_emails_item():
                 dbg=request.args.get('dbg', False)
             )
 
-        # Check email value (should be a email formated string in 1-100 range
-        # unique in entire database)
+        # Check and set email value (should be a email formated string
+        # in 1-100 range unique in entire database)
         if value:
             value = variable_type_check(value.strip(), str)
             if not value.result:
@@ -269,7 +270,7 @@ def post_emails_item():
                 dbg=request.args.get('dbg', False)
             )
 
-        # Check email type (should be a string in 1-20 range)
+        # Check and set email type (should be a string in 1-20 range)
         if type:
             type = variable_type_check(type.strip(), str)
             if not type.result:
@@ -301,12 +302,45 @@ def post_emails_item():
                     dbg=request.args.get('dbg', False)
                 )
 
+        filter = {'user_id': user.value, 'main': True}
+        user_main_email = Emails.query.filter_by(**filter).first()
+
+        # Check state "main" (boolean)
+        if main:
+            main = variable_type_check(main, bool)
+            if not main.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter «&main=%(value)s»"
+                        " is not type of «%(type)s»",
+                        value=main.value,
+                        type=main.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            else:
+                if main.value and not user_main_email:
+                    main = True
+                elif main.value and user_main_email:
+                    main = True
+                    user_main_email.main = False
+                elif not main.value and not user_main_email:
+                    main = True
+                else:
+                    main = False
+        elif user_main_email:
+            main = False
+        elif not user_main_email:
+            main = True
+
         email = Emails(
             user_id=user.value,
             type=type.value if type else None,
             value=value.value,
             verify=0,
             active_until=None,
+            main=main,
         )
         db.session.add(email)
         db.session.flush()
@@ -526,9 +560,9 @@ def put_emails_item(id):
                     user_main_email = Emails.query.filter_by(**filter).first()
                     if user_main_email:
                         user_main_email.main = False
+                    target.verify = 0
+                    target.active_until = None
                 target.main = main.value
-                target.verify = 0
-                target.active_until = None
 
         db.session.commit()
 
