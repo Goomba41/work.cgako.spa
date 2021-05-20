@@ -4,7 +4,7 @@ Database objects.
 Flask database models initialization.
 """
 
-import datetime
+from datetime import datetime
 
 from app import db
 from sqlalchemy_mptt.mixins import BaseNestedSets
@@ -113,6 +113,7 @@ class Users(db.Model):
     )
 
     emails = db.relationship('Emails', backref='users', lazy='dynamic')
+    passwords = db.relationship('Passwords', backref='users', lazy='dynamic')
 
     # def __init__(self, login, password,
     #              name, surname, patronymic,
@@ -251,3 +252,55 @@ class Emails(db.Model):
     def __repr__(self):
         """Class representation string."""
         return 'Email «%r»' % (self.value)
+
+
+class Passwords(db.Model):
+    """Passwords for users model."""
+
+    __tablename__ = 'passwords'
+    # __table_args__ = {'schema': 'innerInformationSystem_System'}
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        comment="Уникальный идентификатор"
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id"
+        ),
+        comment="Пользователь"
+    )
+    value = db.Column(db.String(100), comment="Захешированный пароль")
+    blocked = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+        comment="Статус блокировки пароля"
+    )
+    nubmer_of_uses = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+        comment="Количество использований"
+    )
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.now(),
+        nullable=True,
+        comment="Создан"
+    )
+    active_until = db.Column(
+        db.DateTime,
+        default=None,
+        nullable=True,
+        comment="Активна до"
+    )
+
+    def __repr__(self):
+        """Class representation string."""
+        return 'Password %i «%r» for user «%r»' % (
+            self.id,
+            self.value,
+            self.user_id
+        )

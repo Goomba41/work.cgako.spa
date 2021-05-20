@@ -6,7 +6,7 @@ Flask database models initialization.
 
 from app import ma
 from app.models import OrganizationalStructure, Users, ModulesTypes, \
- Modules, Emails
+ Modules, Emails, Passwords
 
 from marshmallow_sqlalchemy import ModelSchema
 
@@ -156,3 +156,30 @@ class EmailsSchema(ModelSchema):
         }
     )
     users = ma.Nested(UsersBaseSchema(exclude=("emails",)))
+
+
+class PasswordsSchema(ModelSchema):
+    """Passwords serialization schema."""
+
+    class Meta:
+        """Metadata."""
+
+        model = Passwords
+
+    links = ma.Hyperlinks(
+        {
+            "self": ma.URLFor(
+                "APIv1_0_0.get_passwords_item",
+                values=dict(
+                    id="<id>", _external=True
+                )
+            ),
+            "collection": ma.URLFor(
+                "APIv1_0_0.get_passwords",
+                values=dict(
+                    _external=True
+                )
+            ),
+        }
+    )
+    users = ma.Nested(UsersBaseSchema(exclude=("passwords",)))
