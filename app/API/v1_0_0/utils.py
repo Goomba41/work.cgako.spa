@@ -104,29 +104,53 @@ def confirm_email_token(token):
     return emailVerify(True, id)
 
 
-def password_generator(size=8):
+def password_generator(
+    size=8,
+    symbols=True,
+    numeric=True,
+    alpha_lower=True,
+    alpha_upper=True,
+    exclude_similar=True,
+    exclude_ambiguous=True
+):
     """Password generation with a given length."""
     # Defining alphabets for different characher types
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    alphabet_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    numeric = '0123456789'
-    special = '!@#$%^&*()_+~`|}{[]:;?><,./-='
+    alphabet_lower = 'abcdefghjkmnpqrstuvwxyz'
+    alphabet_upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+    digits = '23456789'
+    special_chars = '!#$%&*+-=?@^_'
+
     cryptogen = SystemRandom()
 
     # Joining alphabets in set
-    character_set = alphabet + alphabet_upper + numeric + special
+    character_set = ''
+    if not exclude_similar:
+        alphabet_lower += 'ilo'
+        alphabet_upper += 'IO'
+        digits += '01'
+        special_chars += '|'
+    if not exclude_ambiguous and symbols:
+        special_chars += '{}[]()/\\\'\"`~,;:.<>'
+    if symbols:
+        character_set += special_chars
+    if numeric:
+        character_set += digits
+    if alpha_lower:
+        character_set += alphabet_lower
+    if alpha_upper:
+        character_set += alphabet_upper
 
-    # Get 4 random character from set for password
+    # Get random characters from char set for password
     password_symbols = ''.join(
         cryptogen.choice(character_set) for i in range(size - 4)
     )
 
     # Get one character from each type,
     # lowercase and uppercase latin, number, special symbol
-    password_symbols += cryptogen.choice(alphabet)
+    password_symbols += cryptogen.choice(alphabet_lower)
     password_symbols += cryptogen.choice(alphabet_upper)
-    password_symbols += cryptogen.choice(numeric)
-    password_symbols += cryptogen.choice(special)
+    password_symbols += cryptogen.choice(digits)
+    password_symbols += cryptogen.choice(special_chars)
 
     # Converting taken symbols of password from string to list
     password_symbols = list(map(str, password_symbols))

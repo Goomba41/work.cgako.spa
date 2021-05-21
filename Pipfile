@@ -20,9 +20,12 @@ flask-babel = "*"
 itsdangerous = "*"
 py3-validate-email = "*"
 zxcvbn = "*"
+password-strength = "*"
 
 [dev-packages]
 radon = "*"
+pytest = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

@@ -1,20 +1,22 @@
 """Views of API version 1.0.0: System modules and modules types."""
 
-from flask import request, Response, json  # , url_for, render_template, \
-# current_app as app
+from flask import request, Response, json, current_app as app
+# , url_for, render_template
 from flask_babel import _
 # from flask_mail import Message
-from loguru import logger
+
 # from app import db, mail
 # from datetime import datetime, timedelta
+from zxcvbn import zxcvbn
 
 from .blueprint import APIv1_0_0
-# from app.models import Passwords, Users
+from app.models import Users  # , Passwords
 # from app.schemas import PasswordsSchema
-from .utils import json_http_response  # , marshmallow_excluding_converter, \
+from .utils import json_http_response, variable_type_check, password_generator
+# , marshmallow_excluding_converter, \
 # marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
 # sqlalchemy_orders_converter, pagination_of_list, display_time, \
-# generate_confirmation_token, confirm_email_token, variable_type_check
+# generate_confirmation_token, confirm_email_token
 
 
 @APIv1_0_0.route('/passwords/', methods=['GET'])
@@ -174,114 +176,114 @@ def get_passwords_item(id):
     return response
 
 
-@logger.catch
 @APIv1_0_0.route('/passwords/', methods=['POST'])
 # @token_required
 def post_passwords_item():
     """Post passwords item."""
     try:
         # Get parameters from request
-        # value = request.args.get('value', None)
-        # type = request.args.get('type', None)
-        # user = request.args.get('user', None)
-        # main = request.args.get('main', None)
+        value = request.args.get('value', None)
+        user = request.args.get('user', None)
 
         # Check and set user (should be an integer number existed in database)
-        # if user:
-        #     user = variable_type_check(user, int)
-        #     if not user.result:
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&user=%(value)s» is not type of «%(type)s»",
-        #                 value=user.value,
-        #                 type=user.type
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     user_obj = Users.query.get(user.value)
-        #     if not user_obj:
-        #         return json_http_response(
-        #             status=404,
-        #             given_message=_(
-        #                 "Add email to user with id=%(id)s is impossible:"
-        #                 " user is does not exist in database",
-        #                 id=user.value
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        # else:
-        #     return json_http_response(
-        #         status=400,
-        #         given_message=_(
-        #             "You don't provide user in parameter"
-        #             " «&user=», so adding email has been terminated"
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
+        if user:
+            user = variable_type_check(user, int)
+            if not user.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&user=%(value)s» is not type of «%(type)s»",
+                        value=user.value,
+                        type=user.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            user_obj = Users.query.get(user.value)
+            if not user_obj:
+                return json_http_response(
+                    status=404,
+                    given_message=_(
+                        "Add password to user with id=%(id)s is impossible:"
+                        " user is does not exist in database",
+                        id=user.value
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+        else:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "You don't provide user in parameter"
+                    " «&user=», so adding password has been terminated"
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+
+        pass_test = zxcvbn(value, user_inputs=[
+            user_obj.login,
+            user_obj.name,
+            user_obj.surname,
+            user_obj.patronymic,
+            user_obj.phone,
+            user_obj.birth_date,
+            user_obj.employment_date,
+        ])
+
+        print(pass_test['score'])
 
         # Check and set email value (should be a email formated string
-        # in 1-100 range unique in entire database)
-        # if value:
-        #     value = variable_type_check(value.strip(), str)
-        #     if not value.result:
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&value=%(value)s» is not type of «%(type)s»",
-        #                 value=value.value,
-        #                 type=value.type
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     if len(value.value) > 100:
-        #         answer_string = str(
-        #             value.value[:5]
-        #         )+"..."+str(
-        #             value.value[-5:]
-        #         ) if len(
-        #             value.value
-        #         ) > 10 else value.value
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&value=%(value)s» is out of range 1-100",
-        #                 value=answer_string
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     if not validate_email(value.value):
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Something's wrong with email «%(value)s»"
-        #                 " validation: email incorrect or does not exist",
-        #                 value=value.value
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     if Emails.query.filter(Emails.value == value.value).first():
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Email «%(value)s» already exist in database: email"
-        #                 " must be unique in entire database",
-        #                 value=value.value
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        # else:
-        #     return json_http_response(
-        #         status=400,
-        #         given_message=_(
-        #             "You don't provide email value in parameter"
-        #             " «&value=», so adding email has been terminated"
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
+        # in 6-64 range unique in entire database)
+        if value:
+            value = variable_type_check(value.strip(), str)
+            if not value.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is not type of «%(type)s»",
+                        value=value.value,
+                        type=value.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            if len(value.value) > 64:
+                answer_string = str(
+                    value.value[:5]
+                )+"..."+str(
+                    value.value[-5:]
+                ) if len(
+                    value.value
+                ) > 10 else value.value
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter"
+                        " «&value=%(value)s» is out of range 6-64",
+                        value=answer_string
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+
+            # if Emails.query.filter(Emails.value == value.value).first():
+            #     return json_http_response(
+            #         status=400,
+            #         given_message=_(
+            #             "Email «%(value)s» already exist in database: email"
+            #             " must be unique in entire database",
+            #             value=value.value
+            #         ),
+            #         dbg=request.args.get('dbg', False)
+            #     )
+        else:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "You don't provide password value in parameter"
+                    " «&value=», so adding password has been terminated"
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
         # Check and set email type (should be a string in 1-20 range)
         # if type:
@@ -369,7 +371,8 @@ def post_passwords_item():
         # output_json = {
         #     "message": _(
         #         "Successfully added email «%(email)s»"
-        #         " to user «%(user)s»! Please, check email box for verification"
+        #         " to user «%(user)s»! Please, check email box for
+        # verification"
         #         " mail.",
         #         email=value.value,
         #         user=user_obj.login
@@ -538,7 +541,8 @@ def put_passwords_item(id):
         #     elif main.value != main_ov:
         #         if main.value:
         #             filter = {'user_id': target.user_id, 'main': True}
-        #             user_main_email = Emails.query.filter_by(**filter).first()
+        #             user_main_email = Emails.query.filter_by(**filter)
+        # .first()
         #             if user_main_email:
         #                 user_main_email.main = False
         #             target.verify = 0
@@ -583,84 +587,145 @@ def put_passwords_item(id):
 def get_passwords_autogenerated():
     """Get password autogenerated item."""
     try:
-        # recipient = Emails.query.filter(
-        #     Emails.id == id
-        # ).first()
 
-        # if recipient:
-        #     if recipient.active_until:
-        #         begin_verification_period = recipient.active_until-timedelta(
-        #             days=app.config['USER_MAIL_RENEW_NOTIFICATION']
-        #         )
-        #     else:
-        #         begin_verification_period = datetime.now()+timedelta(
-        #             hours=1
-        #         )
+        s = variable_type_check(request.args.get('size', 16), int)
+        ss = variable_type_check(request.args.get('symbols', True), bool)
+        n = variable_type_check(request.args.get('numeric', True), bool)
+        al = variable_type_check(request.args.get('alpha_lower', True), bool)
+        au = variable_type_check(request.args.get('alpha_upper', True), bool)
+        es = variable_type_check(
+            request.args.get('exclude_similar', True),
+            bool
+        )
+        ea = variable_type_check(
+            request.args.get('exclude_ambiguous', True),
+            bool
+        )
 
-        # if recipient is None:
-        #     return json_http_response(
-        #         status=404,
-        #         given_message=_(
-        #             "Recipient email with id=%(value)s"
-        #             " is does not exist in database",
-        #             value=id
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
-        # elif recipient.verify and datetime.now() < begin_verification_period:
-        #     return json_http_response(
-        #         status=400,
-        #         given_message=_(
-        #             "Recipient email with id=%(value)s"
-        #             " already verified. Request ignored",
-        #             value=id
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
+        if not s.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&size=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=s.value,
+                    type=s.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        elif s.value < 16:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&size=%(value)s»"
+                    " should be >=16",
+                    value=s.value
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not ss.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&symbols=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=ss.value,
+                    type=ss.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not n.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&numeric=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=n.value,
+                    type=n.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not al.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&alpha_lower=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=al.value,
+                    type=al.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not au.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&alpha_upper=%(value)s»"
+                    " is not type of «%(type)s»",
+                    value=au.value,
+                    type=au.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not es.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&exclude_similar="
+                    "%(value)s» is not type of «%(type)s»",
+                    value=es.value,
+                    type=es.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
+        if not ea.result:
+            return json_http_response(
+                status=400,
+                given_message=_(
+                    "Value «%(value)s» from parameter «&exclude_ambiguous="
+                    "%(value)s» is not type of «%(type)s»",
+                    value=ea.value,
+                    type=ea.type
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
-        # expiration = 3600
+        password = password_generator(
+            size=s.value,
+            symbols=ss.value,
+            numeric=n.value,
+            alpha_lower=al.value,
+            alpha_upper=au.value,
+            exclude_similar=es.value,
+            exclude_ambiguous=ea.value
+        )
 
-        # token = generate_confirmation_token(id, expiration)
-        # confirm_url = app.config['CLIENT_LINK'] + '/email/verify/' + \
-        #     token.decode("utf-8")
+        pp = app.config['PASSWORD_POLICY']
 
-        # html = render_template(
-        #     'confirmation_mail.html',
-        #     confirm_url=confirm_url,
-        #     active_time="".join(display_time(expiration))
-        # )
-        # subject = 'Подтверждение адреса электронной почты в ИС'
-        # ' подразделения ГАСПИ'
+        while pp.test(password):
+            password = password_generator(
+                size=s.value,
+                symbols=ss.value,
+                numeric=n.value,
+                alpha_lower=al.value,
+                alpha_upper=au.value,
+                exclude_similar=es.value,
+                exclude_ambiguous=ea.value
+            )
 
-        # message = Message(
-        #     subject,
-        #     html=html,
-        #     recipients=[recipient.value],
-        #     sender=app.config['MAIL_DEFAULT_SENDER']
-        # )
-
-        # try:
-        #     mail.send(message)
-        #     response = json_http_response(
-        #         given_message=_(
-        #             "Mail successfully send to recipient for verification"
-        #         ),
-        #         status=200,
-        #         dbg=request.args.get('dbg', False)
-        #     )
-        # except Exception:
-        #     response = json_http_response(
-        #         given_message=_(
-        #             "Something went wrong! Mail prepared, but not sent!"
-        #         ),
-        #         status=400,
-        #         dbg=request.args.get('dbg', False)
-        #     )
-        print("GET AUTOGEN PASSWORD")
-        response = json_http_response(
-            given_message=_("OK!"),
+        data = {
+            "message": _(
+                "Generated password is: %(password)s",
+                password=password
+            ),
+            'value': password,
+            'responseType': _('Success'),
+            'status': 200
+        }
+        response = Response(
+            response=json.dumps(data),
             status=200,
-            dbg=request.args.get('dbg', False)
+            mimetype='application/json'
         )
     except Exception:
 

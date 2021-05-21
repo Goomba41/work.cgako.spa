@@ -85,7 +85,7 @@ class Users(db.Model):
     name = db.Column(db.String(20), comment="Имя")
     surname = db.Column(db.String(20), comment="Фамилия")
     patronymic = db.Column(db.String(20), comment="Отчество")
-    phone = db.Column(db.String(14), unique=True, comment="Телефон")
+    phone = db.Column(db.String(13), unique=True, comment="Телефон")
     about_me = db.Column(db.Text(), comment="О себе (например, должность)")
 
     birth_date = db.Column(db.Date, comment="Дата рождения")
