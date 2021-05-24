@@ -278,7 +278,7 @@ class Passwords(db.Model):
         nullable=False,
         comment="Статус блокировки пароля"
     )
-    nubmer_of_uses = db.Column(
+    number_of_uses = db.Column(
         db.Integer,
         default=0,
         nullable=False,
@@ -294,7 +294,7 @@ class Passwords(db.Model):
         db.DateTime,
         default=None,
         nullable=True,
-        comment="Активна до"
+        comment="Активен до"
     )
 
     def __repr__(self):
