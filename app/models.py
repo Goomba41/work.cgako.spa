@@ -271,7 +271,8 @@ class Passwords(db.Model):
         ),
         comment="Пользователь"
     )
-    value = db.Column(db.String(100), comment="Захешированный пароль")
+    salt = db.Column(db.String(32), comment="Соль")
+    value = db.Column(db.String(32), comment="Захешированный пароль")
     blocked = db.Column(
         db.Boolean,
         default=False,
