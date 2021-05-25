@@ -380,168 +380,63 @@ def put_passwords_item(id):
 
         # message_addition = ''
 
-        # Get update target email
-        # target = Emails.query.filter(
-        #     Emails.id == id
-        # ).first()
+        # Get update target password
+        target = Passwords.query.get(id)
 
-        # if target is None:
-        #     return json_http_response(
-        #         status=404,
-        #         given_message=_(
-        #             "Email to update with id=%(id)s is not exist"
-        #             " in database",
-        #             id=id
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
-        # else:
-        #     target_ov = target.value
-        #     main_ov = target.main
+        if target is None:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Password to update with id=%(id)s is not exist"
+                    " in database",
+                    id=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
         # Get parameters from request
-        # value = request.args.get('value')
-        # type = request.args.get('type')
-        # main = request.args.get('main', None)
+        blocked = request.args.get('blocked', None)
 
-        # Check email value (should be a email formated string in 1-100 range)
-        # if value:
-        #     value = variable_type_check(value.strip(), str)
-        #     if not value.result:
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&value=%(value)s» is not type of «%(type)s»",
-        #                 value=value.value,
-        #                 type=value.type
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     if len(value.value) > 100:
-        #         answer_string = str(
-        #             value.value[:5]
-        #         )+"..."+str(
-        #             value.value[-5:]
-        #         ) if len(
-        #             value.value
-        #         ) > 10 else value.value
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&value=%(value)s» is out of range 1-100",
-        #                 value=answer_string
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     elif (len(value.value) > 0) and (
-        #             value.value != target.value
-        #     ):
-        #         if not validate_email(value.value):
-        #             return json_http_response(
-        #                 status=400,
-        #                 given_message=_(
-        #                     "Something's wrong with email «%(value)s»"
-        #                     " validation: email incorrect or does not exist",
-        #                     value=value.value
-        #                 ),
-        #                 dbg=request.args.get('dbg', False)
-        #             )
-        #         else:
-        #             target.value = value.value
-        #             target.verify = 0
-        #             target.active_until = None
-        # ----------------------------------------------------------------------
+        # Check password blocked status value (should be a boolean)
+        if blocked:
+            blocked = variable_type_check(blocked, bool)
+            if not blocked.result:
+                return json_http_response(
+                    status=400,
+                    given_message=_(
+                        "Value «%(value)s» from parameter «&blocked=%(value)s»"
+                        " is not type of «%(type)s»",
+                        value=blocked.value,
+                        type=blocked.type
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            elif blocked.value != target.blocked:
+                if not blocked.value:
+                    filter = {'user_id': target.user_id, 'blocked': False}
+                    user_passwords = Passwords.query.filter_by(**filter).all()
+                    for password in user_passwords:
+                        if password:
+                            password.blocked = True
+                target.blocked = blocked.value
+                db.session.commit()
 
-        # Check email type (should be a string in 1-20 range)
-        # if type:
-        #     type = variable_type_check(type.strip(), str)
-        #     if not type.result:
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&type=%(value)s» is not type of «%(type)s»",
-        #                 value=type.value,
-        #                 type=type.type
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     if len(type.value) > 20:
-        #         answer_string = str(
-        #             type.value[:5]
-        #         )+"..."+str(
-        #             type.value[-5:]
-        #         ) if len(
-        #             type.value
-        #         ) > 10 else type.value
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter"
-        #                 " «&type=%(value)s» is out of range 1-20",
-        #                 value=answer_string
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     elif (len(type.value) > 0) and (
-        #             type.value != target.type
-        #     ):
-        #         target.type = type.value
-        # ----------------------------------------------------------------------
+                response = json_http_response(
+                    status=200,
+                    given_message=_(
+                        "Password updated!"
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
+            else:
+                response = json_http_response(
+                    status=200,
+                    given_message=_(
+                        "Password not updated! You are sending the same data!"
+                    ),
+                    dbg=request.args.get('dbg', False)
+                )
 
-        # Check state "main" (boolean)
-        # if main:
-        #     main = variable_type_check(main, bool)
-        #     if not main.result:
-        #         return json_http_response(
-        #             status=400,
-        #             given_message=_(
-        #                 "Value «%(value)s» from parameter «&main=%(value)s»"
-        #                 " is not type of «%(type)s»",
-        #                 value=main.value,
-        #                 type=main.type
-        #             ),
-        #             dbg=request.args.get('dbg', False)
-        #         )
-        #     elif main.value != main_ov:
-        #         if main.value:
-        #             filter = {'user_id': target.user_id, 'main': True}
-        #             user_main_email = Emails.query.filter_by(**filter)
-        # .first()
-        #             if user_main_email:
-        #                 user_main_email.main = False
-        #             target.verify = 0
-        #             target.active_until = None
-        #         target.main = main.value
-
-        # db.session.commit()
-
-        # if target.value != target_ov or (
-        #     main and main.value != main_ov and main.value
-        # ):
-        #     post_emails_verify_item(id)
-        #     message_addition = _(
-        #         " Check updated email for"
-        #         " confirmation mail!"
-        #     )
-
-        # response = json_http_response(
-        #     status=200,
-        #     given_message=_(
-        #         "Email «%(value)s» has been updated!",
-        #         value=target_ov
-        #     )+message_addition,
-        #     dbg=request.args.get('dbg', False)
-        # )
-
-        print(f"PUT PASSWORD {id}")
-        response = json_http_response(
-            given_message=_("OK!"),
-            status=200,
-            dbg=request.args.get('dbg', False)
-        )
     except Exception:
 
         response = json_http_response(dbg=request.args.get('dbg', False))
