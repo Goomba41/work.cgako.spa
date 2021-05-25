@@ -12,10 +12,11 @@ import bcrypt
 
 from .blueprint import APIv1_0_0
 from app.models import Users, Passwords
-# from app.schemas import PasswordsSchema
-from .utils import json_http_response, variable_type_check, password_generator
-# , marshmallow_excluding_converter, \
-# marshmallow_only_fields_converter, sqlalchemy_filters_converter, \
+from app.schemas import PasswordsSchema
+from .utils import json_http_response, variable_type_check, \
+    password_generator, marshmallow_excluding_converter, \
+    marshmallow_only_fields_converter \
+    # sqlalchemy_filters_converter, \
 # sqlalchemy_orders_converter, pagination_of_list, display_time, \
 # generate_confirmation_token, confirm_email_token
 
@@ -117,59 +118,55 @@ def get_passwords_item(id):
     """Get passwords item by id."""
     try:
         # Get parameters from request
-        # exclusions_list = request.args.get('exclude')
-        # columns_list = request.args.get('columns')
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
+        # ----------------------------------------------------------------------
 
         # Forming dumping parameters
-        # dump_params = {}
+        dump_params = {}
 
         # Check if values of getted parameters exist in database table
         # and set dump settings
-        # try:
-        #     if exclusions_list:
-        #         exclusions_list = marshmallow_excluding_converter(
-        #             Emails, exclusions_list
-        #         )
-        #         if 'id' in exclusions_list:
-        #             exclusions_list.remove('id')
-        #         dump_params['exclude'] = exclusions_list
-        #     if columns_list:
-        #         columns_list = marshmallow_only_fields_converter(
-        #             Emails, columns_list
-        #         )
-        #         dump_params['only'] = ["id"] + columns_list
-        # except Exception as error:
-        #     return error.args[0]
+        try:
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Passwords, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Passwords, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
+        except Exception as error:
+            return error.args[0]
 
-        # schema = EmailsSchema(**dump_params)
+        schema = PasswordsSchema(**dump_params)
         # ----------------------------------------------------------------------
 
         # Query item from database, and if is not none dump it
-        # item = Emails.query.get(id)
-        # if not item:
-        #     return json_http_response(
-        #         status=404,
-        #         given_message=_(
-        #             "Email with id=%(id)s doesn't exist in database",
-        #             id=id
-        #         ),
-        #         dbg=request.args.get('dbg', False)
-        #     )
+        item = Passwords.query.get(id)
+        if not item:
+            return json_http_response(
+                status=404,
+                given_message=_(
+                    "Password with id=%(id)s doesn't exist in database",
+                    id=id
+                ),
+                dbg=request.args.get('dbg', False)
+            )
 
-        # data = schema.dump(item)
+        data = schema.dump(item)
         # ----------------------------------------------------------------------
 
-        # response = Response(
-        #     response=json.dumps(data),
-        #     status=200,
-        #     mimetype='application/json'
-        # )
-        print(f"GET PASSWORD {id}")
         response = Response(
-            response=json.dumps("OK!"),
+            response=json.dumps(data),
             status=200,
             mimetype='application/json'
         )
+
     except Exception:
 
         response = json_http_response(dbg=request.args.get('dbg', False))
@@ -223,7 +220,7 @@ def post_passwords_item():
             )
         # ----------------------------------------------------------------------
 
-        # Check and set email value (should be a email formated string
+        # Check and set password value (string
         # in 16-64 range unique in entire database)
         if value:
             value = variable_type_check(value.strip(), str)
@@ -378,8 +375,6 @@ def put_passwords_item(id):
     """Update passwords item by id."""
     try:
 
-        # message_addition = ''
-
         # Get update target password
         target = Passwords.query.get(id)
 
@@ -393,6 +388,7 @@ def put_passwords_item(id):
                 ),
                 dbg=request.args.get('dbg', False)
             )
+        # ----------------------------------------------------------------------
 
         # Get parameters from request
         blocked = request.args.get('blocked', None)
@@ -411,6 +407,7 @@ def put_passwords_item(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 )
+            # If paramenter passes validation then change database value
             elif blocked.value != target.blocked:
                 if not blocked.value:
                     filter = {'user_id': target.user_id, 'blocked': False}
@@ -428,6 +425,7 @@ def put_passwords_item(id):
                     ),
                     dbg=request.args.get('dbg', False)
                 )
+            # ------------------------------------------------------------------
             else:
                 response = json_http_response(
                     status=200,
