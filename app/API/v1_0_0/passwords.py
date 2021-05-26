@@ -1,11 +1,11 @@
 """Views of API version 1.0.0: System modules and modules types."""
 
-from flask import request, Response, json, current_app as app, url_for
-# , render_template
+from flask import request, Response, json, current_app as app, url_for, \
+    render_template
 from flask_babel import _
-# from flask_mail import Message
+from flask_mail import Message
 
-from app import db  # mail
+from app import db, mail
 from datetime import datetime, timedelta
 from zxcvbn import zxcvbn
 import bcrypt
@@ -15,10 +15,9 @@ from app.models import Users, Passwords
 from app.schemas import PasswordsSchema
 from .utils import json_http_response, variable_type_check, \
     password_generator, marshmallow_excluding_converter, \
-    marshmallow_only_fields_converter \
-    # sqlalchemy_filters_converter, \
-# sqlalchemy_orders_converter, pagination_of_list, display_time, \
-# generate_confirmation_token, confirm_email_token
+    marshmallow_only_fields_converter, \
+    sqlalchemy_filters_converter, sqlalchemy_orders_converter, \
+    pagination_of_list
 
 
 @APIv1_0_0.route('/passwords/', methods=['GET'])
@@ -27,81 +26,75 @@ def get_passwords():
     """Get passwords list."""
     try:
         # Get parameters from request
-        # filters_list = request.args.get('filters')
-        # exclusions_list = request.args.get('exclude')
-        # columns_list = request.args.get('columns')
-        # orders_list = request.args.get('order_by')
+        filters_list = request.args.get('filters')
+        exclusions_list = request.args.get('exclude')
+        columns_list = request.args.get('columns')
+        orders_list = request.args.get('order_by')
         # ----------------------------------------------------------------------
 
         # Forming dumping parameters
-        # dump_params = {'many': True}
+        dump_params = {'many': True}
 
         # Check if values of getted parameters exist in database table
         # and set dump settings
-        # try:
-        #     if exclusions_list:
-        #         exclusions_list = marshmallow_excluding_converter(
-        #             Emails, exclusions_list
-        #         )
-        #         if 'id' in exclusions_list:
-        #             exclusions_list.remove('id')
-        #         dump_params['exclude'] = exclusions_list
-        #     if columns_list:
-        #         columns_list = marshmallow_only_fields_converter(
-        #             Emails, columns_list
-        #         )
-        #         dump_params['only'] = ["id"] + columns_list
-        # except Exception as error:
-        #     return error.args[0]
+        try:
+            if exclusions_list:
+                exclusions_list = marshmallow_excluding_converter(
+                    Passwords, exclusions_list
+                )
+                if 'id' in exclusions_list:
+                    exclusions_list.remove('id')
+                dump_params['exclude'] = exclusions_list
+            if columns_list:
+                columns_list = marshmallow_only_fields_converter(
+                    Passwords, columns_list
+                )
+                dump_params['only'] = ["id"] + columns_list
+        except Exception as error:
+            return error.args[0]
 
-        # schema = EmailsSchema(**dump_params)
+        schema = PasswordsSchema(**dump_params)
         # ----------------------------------------------------------------------
 
         # Make empty base query and if
         # filters and orders exist - add it to query
-        # elements = Emails.query
+        elements = Passwords.query
 
-        # if filters_list:
-        #     try:
-        #         filters_list = sqlalchemy_filters_converter(
-        #             Emails,
-        #             filters_list
-        #         )
-        #     except Exception as error:
-        #         return error.args[0]
-        #     elements = elements.filter(*filters_list)
-        # if orders_list:
-        #     try:
-        #         orders_list = sqlalchemy_orders_converter(
-        #             Emails, orders_list
-        #         )
-        #     except Exception as error:
-        #         return error.args[0]
-        #     elements = elements.order_by(*orders_list)
+        if filters_list:
+            try:
+                filters_list = sqlalchemy_filters_converter(
+                    Passwords,
+                    filters_list
+                )
+            except Exception as error:
+                return error.args[0]
+            elements = elements.filter(*filters_list)
+        if orders_list:
+            try:
+                orders_list = sqlalchemy_orders_converter(
+                    Passwords, orders_list
+                )
+            except Exception as error:
+                return error.args[0]
+            elements = elements.order_by(*orders_list)
         # ----------------------------------------------------------------------
 
-        # data = schema.dump(elements.all())
+        data = schema.dump(elements.all())
 
         # Paginating results of dumping
         # Probably would best is pagination in sqlalchemy query?
-        # data = pagination_of_list(
-        #     data,
-        #     url_for(
-        #         '.get_modules',
-        #         _external=True
-        #     ),
-        #     query_params=request.args
-        # )
+        data = pagination_of_list(
+            data,
+            url_for(
+                '.get_passwords',
+                _external=True
+            ),
+            query_params=request.args
+        )
         # ----------------------------------------------------------------------
 
-        # response = Response(
-        #     response=json.dumps(data),
-        #     status=200,
-        #     mimetype='application/json'
-        # )
-        print("GET ALL PASSWORDS")
         response = Response(
-            response=json.dumps("OK!"),
+            response=json.dumps(data),
             status=200,
             mimetype='application/json'
         )
@@ -350,7 +343,27 @@ def post_passwords_item():
             ),
         )
         db.session.add(add_password)
-        db.session.commit()
+        # db.session.commit()
+        # ----------------------------------------------------------------------
+
+        # Send email if password was changed
+        html = render_template(
+            'change_password.html'
+        )
+        subject = 'Изменен пароль Вашей учетной записи в ИС'
+        ' подразделения ГАСПИ'
+
+        for email in user_obj.emails:
+            message = Message(
+                subject,
+                html=html,
+                recipients=[email.value],
+                sender=app.config['MAIL_DEFAULT_SENDER']
+            )
+            try:
+                mail.send(message)
+            except Exception:
+                pass
         # ----------------------------------------------------------------------
 
         response = json_http_response(
@@ -415,6 +428,26 @@ def put_passwords_item(id):
                     for password in user_passwords:
                         if password:
                             password.blocked = True
+                else:
+                    # Send email if password was blocked
+                    html = render_template(
+                        'block_password.html'
+                    )
+                    subject = 'Блокировка учетной записи в ИС'
+                    ' подразделения ГАСПИ'
+                    user = Users.query.get(target.user_id)
+                    for email in user.emails:
+                        message = Message(
+                            subject,
+                            html=html,
+                            recipients=[email.value],
+                            sender=app.config['MAIL_DEFAULT_SENDER']
+                        )
+
+                        try:
+                            mail.send(message)
+                        except Exception:
+                            pass
                 target.blocked = blocked.value
                 db.session.commit()
 
